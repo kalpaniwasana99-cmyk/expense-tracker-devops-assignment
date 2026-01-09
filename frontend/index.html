@@ -13,10 +13,11 @@
         <header>
             <h1>Expense Tracker</h1>
             <p>Keep track of your daily spending</p>
+            <button id="logout-btn" style="background-color: #c0392b; color: white; border: none; padding: 5px 10px; cursor: pointer; margin-top: 10px;">Logout</button>
         </header>
 
         <section class="input-section">
-            <form id="expense-form">
+            <form id="transaction-form">
                 <div class="form-control">
                     <label for="text">Expense Name</label>
                     <input type="text" id="text" placeholder="e.g. Lunch, Bus Ticket..." required>
@@ -34,7 +35,8 @@
         <section class="list-section">
             <h3>History</h3>
             <ul id="list" class="list">
-                </ul>
+                
+            </ul>
         </section>
         
         <div class="total-container">
@@ -42,6 +44,6 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <script type="module" src="script.js"></script>
 </body>
 </html>
