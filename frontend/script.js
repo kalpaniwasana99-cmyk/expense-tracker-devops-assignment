@@ -3,15 +3,17 @@ import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/
 
 const logoutBtn = document.getElementById('logout-btn');
 
+
 onAuthStateChanged(auth, (user) => {
     if (user) {
         console.log("Logged in:", user.email);
     } else {
+        // Login 
         window.location.href = "login.html";
     }
 });
 
-//  Logout Button 
+
 if (logoutBtn) {
     logoutBtn.addEventListener('click', () => {
         signOut(auth).then(() => {
