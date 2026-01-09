@@ -3,13 +3,11 @@ import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/
 
 const logoutBtn = document.getElementById('logout-btn');
 
-//  Security Check)
-
 onAuthStateChanged(auth, (user) => {
     if (user) {
-        console.log("Logged in as:", user.email);
+        console.log("Logged in:", user.email);
     } else {
-        window.location.href = "login.html"; // එළියට!
+        window.location.href = "login.html";
     }
 });
 
