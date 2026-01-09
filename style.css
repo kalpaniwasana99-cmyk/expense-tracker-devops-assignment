@@ -1,111 +1,25 @@
-/* මුළු පිටුවටම අදාල සැකසුම් */
-* {
-    box-sizing: border-box; /* පෙට්ටිවල සයිස් එක අවුල් නොවෙන්න */
-    margin: 0;
-    padding: 0;
-}
 
-body {
-    background-color: #f7f7f7; /* ලා අළු පාට පසුබිමක් */
-    font-family: 'Poppins', sans-serif;
-    display: flex;
-    justify-content: center; /* මැදට ගන්න */
-    align-items: center;
-    min-height: 100vh;
-    padding: 20px;
-}
-
-/* මැද තියෙන සුදු පාට පෙට්ටිය */
-.container {
-    background-color: #fff;
-    width: 400px;
-    border-radius: 10px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); /* පොඩි ෂැඩෝ එකක් */
-    padding: 25px;
-}
-
-header {
+.auth-container {
+    max-width: 350px; 
     text-align: center;
-    margin-bottom: 20px;
 }
 
-header h1 {
-    color: #333;
+.auth-container header {
+    margin-bottom: 30px;
 }
 
-header p {
-    color: #777;
+.auth-link {
+    margin-top: 15px;
     font-size: 0.9rem;
-}
-
-/* Form එකේ ස්ටයිල් */
-.form-control {
-    margin-bottom: 15px;
-}
-
-label {
-    display: block;
-    margin-bottom: 5px;
     color: #555;
+}
+
+.auth-link a {
+    color: #6c5ce7;
+    text-decoration: none;
     font-weight: 600;
 }
 
-input {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    font-size: 1rem;
-}
-
-/* බට්න් එක */
-.btn {
-    width: 100%;
-    background-color: #6c5ce7; /* ලස්සන දම් පාටක් */
-    color: white;
-    border: none;
-    padding: 12px;
-    border-radius: 5px;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: background 0.3s;
-}
-
-.btn:hover {
-    background-color: #5b4bc4; /* මවුස් එක ගෙනිච්චම පාට වෙනස් වෙන්න */
-}
-
-/* ලිස්ට් එකේ ස්ටයිල් */
-.list-section h3 {
-    margin: 20px 0 10px;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 5px;
-}
-
-.list {
-    list-style-type: none;
-    max-height: 200px; /* ලිස්ට් එක දිග වැඩි වුනොත් Scroll වෙන්න */
-    overflow-y: auto;
-}
-
-.list li {
-    background-color: #fff;
-    border-left: 5px solid #e74c3c; /* වියදමක් නිසා රතු පාට ඉරක් */
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-    color: #333;
-    display: flex;
-    justify-content: space-between;
-    padding: 10px;
-    margin-bottom: 10px;
-    font-size: 0.95rem;
-}
-
-/* Total පෙන්නන තැන */
-.total-container {
-    text-align: right;
-    margin-top: 20px;
-    font-size: 1.2rem;
-    color: #333;
-    border-top: 2px solid #f7f7f7;
-    padding-top: 10px;
+.auth-link a:hover {
+    text-decoration: underline;
 }
