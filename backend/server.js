@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+app.use(cora());
 const bodyParser = require('body-parser');
 
 const app = express();
