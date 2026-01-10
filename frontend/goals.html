@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Smart Savings Goals</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --success-color: #4cc9f0;
+            --danger-color: #f72585;
+            --bg-color: #f8f9fa;
+        }
+
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-color); margin: 0; color: #333; }
+        
+        /* Professional Navigation */
+        nav { background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); padding: 1rem; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        nav a { color: white; margin: 0 20px; text-decoration: none; font-weight: 600; transition: 0.3s; opacity: 0.9; }
+        nav a:hover { opacity: 1; text-decoration: underline; }
+
+        .header-section { padding: 40px 20px; text-align: center; }
+        .header-section img { width: 80px; margin-bottom: 15px; }
+
+        .main-container { max-width: 900px; margin: auto; padding: 0 20px 50px; }
+
+        /* Goal Input Form Card */
+        .form-card {
+            background: white; padding: 30px; border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05); margin-bottom: 40px;
+        }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; }
+        .form-card input {
+            padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 15px; outline: none;
+        }
+        .form-card input:focus { border-color: var(--primary-color); }
+        .add-goal-btn {
+            grid-column: span 3; background: var(--primary-color); color: white;
+            border: none; padding: 15px; border-radius: 10px; font-weight: bold;
+            cursor: pointer; transition: 0.3s; margin-top: 10px;
+        }
+        .add-goal-btn:hover { background: var(--secondary-color); transform: translateY(-2px); }
+
+        /* Modern Goal Card */
+        .goal-card {
+            background: white; border-radius: 18px; padding: 25px; margin-bottom: 20px;
+            display: flex; align-items: center; justify-content: space-between;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.03); transition: 0.3s;
+            border-left: 6px solid var(--primary-color);
+        }
+        .goal-card:hover { transform: scale(1.02); }
+        .goal-details { flex: 1; }
+        .goal-name { font-size: 1.3rem; font-weight: 700; color: #222; margin-bottom: 5px; }
+        .amount-info { color: #666; font-size: 0.95rem; margin-bottom: 15px; }
+
+        .update-section { display: flex; gap: 10px; align-items: center; }
+        .update-section input { width: 100px; padding: 8px; border-radius: 8px; border: 1px solid #ddd; }
+        .btn-save { background: #eef2ff; color: var(--primary-color); border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: 600; }
+
+        /* Progress Bar Section */
+        .progress-box { text-align: center; margin: 0 30px; }
+        .outer-bar { width: 150px; height: 10px; background: #eee; border-radius: 10px; overflow: hidden; margin-bottom: 5px; }
+        .inner-bar { height: 100%; background: linear-gradient(90deg, #4cc9f0, #4361ee); transition: 0.5s; }
+        .percentage { font-weight: 800; color: var(--primary-color); font-size: 1.1rem; }
+
+        .btn-delete { background: #fff1f2; color: #f43f5e; border: none; padding: 10px; border-radius: 50%; cursor: pointer; transition: 0.3s; }
+        .btn-delete:hover { background: #f43f5e; color: white; }
+
+        .chart-card { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); text-align: center; }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="index.html">🏠 Dashboard</a>
+        <a href="summary.html">📊 Statistics</a>
+        <a href="goals.html">🎯 Savings Goals</a>
+        <a href="profile.html">👤 Profile</a>
+    </nav>
+
+    <div class="header-section">
+        <img src="https://cdn-icons-png.flaticon.com/512/3135/3135706.png" alt="Savings">
+        <h1>Smart Savings Goals</h1>
+        <p>Plan your future by tracking every rupee you save.</p>
+    </div>
+
+    <div class="main-container">
+        <div class="form-card">
+            <div class="form-grid">
+                <input type="text" id="goal-name" placeholder="What are you saving for?">
+                <input type="number" id="target-amount" placeholder="Target Amount (Rs.)">
+                <input type="number" id="daily-save" placeholder="Daily Goal (Optional)">
+                <button class="add-goal-btn" id="add-goal-btn">Set New Savings Goal</button>
+            </div>
+        </div>
+
+        <div id="goals-list"></div>
+
+        <div class="chart-card">
+            <h3>Visual Progress Tracker</h3>
+            <div style="width: 300px; margin: auto;">
+                <canvas id="goalsChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { auth } from "./firebase-config.js";
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        const goalsListDiv = document.getElementById('goals-list');
+        const backendBaseUrl = "https://nonfeasibly-nonfavorable-dakota.ngrok-free.dev"; // Check this URL
+        let goalsChartInstance = null;
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) { loadGoals(user.uid); }
+            else { window.location.href = "login.html"; }
+        });
+
+        async function loadGoals(uid) {
+            try {
+                const response = await fetch(`${backendBaseUrl}/get-goals/${uid}`, {
+                    headers: { 'ngrok-skip-browser-warning': 'true' }
+                });
+                const result = await response.json();
+                goalsListDiv.innerHTML = '';
+
+                if (result.status === "success" && result.data.length > 0) {
+                    let labels = []; let data = [];
+
+                    result.data.forEach(goal => {
+                        const progress = Math.min((goal.savedAmount / goal.targetAmount) * 100, 100);
+                        const isAchieved = progress >= 100;
+
+                        const card = document.createElement('div');
+                        card.className = 'goal-card';
+                        if(isAchieved) card.style.borderColor = "#4CAF50";
+
+                        card.innerHTML = `
+                            <div class="goal-details">
+                                <div class="goal-name">${goal.goalName}</div>
+                                <div class="amount-info">Rs. ${goal.savedAmount.toLocaleString()} saved of Rs. ${goal.targetAmount.toLocaleString()}</div>
+                                ${isAchieved ? '<span class="achieved-msg">Goal Achieved! 🎉</span>' : `
+                                <div class="update-section">
+                                    <input type="number" class="amt-input" data-id="${goal.id}" placeholder="Rs.">
+                                    <button class="btn-save upd-trigger" data-id="${goal.id}">Add Saving</button>
+                                </div>`}
+                            </div>
+                            <div class="progress-box">
+                                <div class="percentage">${progress.toFixed(0)}%</div>
+                                <div class="outer-bar"><div class="inner-bar" style="width: ${progress}%"></div></div>
+                            </div>
+                            <button class="btn-delete del-trigger" data-id="${goal.id}">✕</button>
+                        `;
+                        goalsListDiv.appendChild(card);
+                        labels.push(goal.goalName); data.push(goal.savedAmount);
+                    });
+
+                    // Event Listeners
+                    document.querySelectorAll('.upd-trigger').forEach(btn => {
+                        btn.onclick = () => {
+                            const id = btn.getAttribute('data-id');
+                            const val = document.querySelector(`.amt-input[data-id="${id}"]`).value;
+                            updateProgress(id, val);
+                        };
+                    });
+
+                    document.querySelectorAll('.del-trigger').forEach(btn => {
+                        btn.onclick = () => deleteGoal(btn.getAttribute('data-id'));
+                    });
+
+                    updateChart(labels, data);
+                }
+            } catch (e) { console.log(e); }
+        }
+
+        async function updateProgress(id, val) {
+            if (!val || val <= 0) return alert("Enter valid amount");
+            await fetch(`${backendBaseUrl}/update-goal-progress`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
+                body: JSON.stringify({ goalId: id, addingAmount: val })
+            });
+            location.reload();
+        }
+
+        async function deleteGoal(id) {
+            if (!confirm("Remove this goal?")) return;
+            await fetch(`${backendBaseUrl}/delete-goal/${id}`, { 
+                method: 'DELETE',
+                headers: { 'ngrok-skip-browser-warning': 'true' }
+            });
+            location.reload();
+        }
+
+        document.getElementById('add-goal-btn').onclick = async () => {
+            const name = document.getElementById('goal-name').value;
+            const target = document.getElementById('target-amount').value;
+            if (!name || !target) return alert("Fill required fields");
+
+            await fetch(`${backendBaseUrl}/add-goal`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
+                body: JSON.stringify({ userId: auth.currentUser.uid, goalName: name, targetAmount: target, dailySave: 0 })
+            });
+            location.reload();
+        };
+
+        function updateChart(labels, data) {
+            if (goalsChartInstance) goalsChartInstance.destroy();
+            const ctx = document.getElementById('goalsChart').getContext('2d');
+            goalsChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: { labels: labels, datasets: [{ data: data, backgroundColor: ['#4361ee', '#4cc9f0', '#4895ef', '#560bad', '#f72585'] }] },
+                options: { cutout: '70%', plugins: { legend: { position: 'bottom' } } }
+            });
+        }
+    </script>
+</body>
+</html>
