@@ -19,10 +19,10 @@ app.post('/login-notify', (req, res) => {
     const userData = req.body;
     
     console.log("=====================================");
-    console.log("🔔 New User Login Detected!");
-    console.log("📧 Email:", userData.email);
-    console.log("🆔 UID:", userData.uid);
-    console.log("⏰ Time:", userData.loginTime);
+    console.log("New User Login Detected!");
+    console.log("Email:", userData.email);
+    console.log("UID:", userData.uid);
+    console.log("Time:", userData.loginTime);
     console.log("=====================================");
 
     res.json({ 
@@ -31,6 +31,6 @@ app.post('/login-notify', (req, res) => {
     });
 });
 
-app.listen(PORT, () => {
-    console.log(`🚀 Server is flying on http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server is flying on http://0.0.0.0:${PORT}`);
 });
