@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transaction History</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .history-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-top: 20px; }
+        .date-group { margin-top: 20px; border-bottom: 2px solid #673ab7; padding-bottom: 5px; font-weight: bold; color: #673ab7; }
+        .history-list { list-style: none; padding: 0; }
+        .history-item { display: flex; justify-content: space-between; padding: 12px; border-bottom: 1px solid #eee; }
+    </style>
+</head>
+<body>
+    <nav style="background: #673ab7; padding: 15px; text-align: center;">
+        <a href="index.html" style="color: white; margin: 10px; text-decoration: none;">🏠 Dashboard</a>
+        <a href="history.html" style="color: white; margin: 10px; text-decoration: none; font-weight: bold;">📜 History</a>
+    </nav>
+
+    <div class="container">
+        <h1>Expense History</h1>
+        <div id="history-content" class="history-card">
+            <p style="text-align: center;">Loading history...</p>
+        </div>
+    </div>
+
+    <script type="module">
+        const API_URL = "https://nonfeasibly-nonfavorable-dakota.ngrok-free.dev";
+        const content = document.getElementById('history-content');
+
+        async function loadHistory() {
+            try {
+                const response = await fetch(`${API_URL}/get-expenses`, {
+                    headers: { 'ngrok-skip-browser-warning': 'true' }
+                });
+                const data = await response.json();
+                
+                if (data.length === 0) {
+                    content.innerHTML = "<p>No history found.</p>";
+                    return;
+                }
+
+                content.innerHTML = "";
+                // දත්ත දිනය අනුව පෙළගැස්වීම මෙතැනදී සිදු කළ හැක
+                data.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = "history-item";
+                    div.innerHTML = `<span>${item.itemName}</span> <strong>Rs. ${item.price}</strong>`;
+                    content.appendChild(div);
+                });
+            } catch (error) { content.innerHTML = "<p>Error loading history.</p>"; }
+        }
+        loadHistory();
+    </script>
+</body>
+</html>
