@@ -104,3 +104,60 @@ header h1 {
 .auth-container { width: 100%; max-width: 350px; text-align: center; }
 .auth-link { margin-top: 15px; font-size: 0.9rem; color: #555; }
 .auth-link a { color: var(--primary-color); text-decoration: none; font-weight: 600; }
+
+/* Navigation Bar Styles */
+.navbar {
+    background: #673ab7;
+    padding: 15px;
+    display: flex;
+    flex-wrap: wrap; /* පෝන් එකේදී ලින්ක් පල්ලෙහාට වැටීමට */
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.navbar a {
+    color: white;
+    text-decoration: none;
+    font-size: 14px;
+    padding: 8px 12px;
+    border-radius: 5px;
+    background: rgba(255, 255, 255, 0.1);
+    transition: background 0.3s;
+}
+
+.navbar a:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* Logout Button Style */
+.logout-btn {
+    background-color: #c0392b;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+    font-family: inherit;
+}
+
+/* Mobile Responsive Adjustments */
+@media (max-width: 480px) {
+    .navbar {
+        padding: 10px 5px;
+    }
+    
+    .navbar a {
+        font-size: 12px;
+        flex: 1 1 40%; /* පේළියකට ලින්ක් 2 බැගින් ලස්සනට පෙන්වීමට */
+        text-align: center;
+    }
+
+    header h1 {
+        font-size: 1.5rem;
+    }
+}
