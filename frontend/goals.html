@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>My Savings Goals</title>
     <link rel="stylesheet" href="style.css">
     <style>
@@ -36,10 +37,70 @@
 
         <div id="goals-list">
             <p style="text-align: center;">Loading your goals...</p>
+
+    <title>Smart Savings Goals</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --success-color: #4cc9f0;
+            --bg-color: #f8f9fa;
+        }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-color); margin: 0; color: #333; }
+        .header-section { padding: 40px 20px; text-align: center; }
+        .header-section img { width: 80px; margin-bottom: 15px; }
+        .main-container { max-width: 900px; margin: auto; padding: 0 20px 50px; }
+        .form-card { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); margin-bottom: 40px; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; }
+        .form-card input { padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 15px; outline: none; }
+        .add-goal-btn { grid-column: span 3; background: var(--primary-color); color: white; border: none; padding: 15px; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px; }
+        .goal-card { background: white; border-radius: 18px; padding: 25px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 5px 15px rgba(0,0,0,0.03); border-left: 6px solid var(--primary-color); }
+        .outer-bar { width: 150px; height: 10px; background: #eee; border-radius: 10px; overflow: hidden; margin-bottom: 5px; }
+        .inner-bar { height: 100%; background: linear-gradient(90deg, #4cc9f0, #4361ee); transition: 0.5s; }
+        @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } .goal-card { flex-direction: column; text-align: center; } }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="index.html">🏠 Dashboard</a>
+        <a href="summary.html">📊 Statistics</a>
+        <a href="goals.html">🎯 Goals</a>
+        <a href="profile.html">👤 Profile</a>
+    </nav>
+
+    <div class="header-section">
+        <img src="https://cdn-icons-png.flaticon.com/512/3135/3135706.png" alt="Savings">
+        <h1>Smart Savings Goals</h1>
+        <p>Plan your future by tracking every rupee you save.</p>
+    </div>
+
+    <div class="main-container">
+        <div class="form-card">
+            <div class="form-grid">
+                <input type="text" id="goal-name" placeholder="What are you saving for?">
+                <input type="number" id="target-amount" placeholder="Target Amount (Rs.)">
+                <input type="number" id="daily-save" placeholder="Daily Goal (Optional)">
+                <button class="add-goal-btn" id="add-goal-btn">Set New Savings Goal</button>
+            </div>
+        </div>
+
+        <div id="goals-list"></div>
+
+        <div class="chart-card" style="background: white; padding: 30px; border-radius: 20px; text-align: center;">
+            <h3>Visual Progress Tracker</h3>
+            <div style="width: 250px; margin: auto;">
+                <canvas id="goalsChart"></canvas>
+            </div>
+
         </div>
     </div>
 
     <script type="module">
+
         const API_URL = "https://nonfeasibly-nonfavorable-dakota.ngrok-free.dev";
         const goalsList = document.getElementById('goals-list');
 
@@ -114,6 +175,76 @@
         });
 
         fetchGoals();
+
+        import { auth } from "./firebase-config.js";
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        // --- Backend URL එක මෙතන තියෙනවා ---
+        const backendBaseUrl = "https://nonfeasibly-nonfavorable-dakota.ngrok-free.dev";
+        const goalsListDiv = document.getElementById('goals-list');
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) { 
+                loadGoals(user.uid); 
+            } else { 
+                window.location.href = "login.html"; 
+            }
+        });
+
+        // --- Goals ලෝඩ් කරන ප්‍රධාන කොටස ---
+        async function loadGoals(uid) {
+            try {
+                const response = await fetch(`${backendBaseUrl}/get-goals/${uid}`, {
+                    headers: { 'ngrok-skip-browser-warning': 'true' }
+                });
+                const result = await response.json();
+                goalsListDiv.innerHTML = '';
+
+                if (result.status === "success" && result.data.length > 0) {
+                    result.data.forEach(goal => {
+                        const progress = Math.min((goal.savedAmount / goal.targetAmount) * 100, 100);
+                        const card = document.createElement('div');
+                        card.className = 'goal-card';
+                        card.innerHTML = `
+                            <div class="goal-details">
+                                <div class="goal-name">${goal.goalName}</div>
+                                <div class="amount-info">Rs. ${goal.savedAmount.toLocaleString()} saved of Rs. ${goal.targetAmount.toLocaleString()}</div>
+                            </div>
+                            <div class="progress-box">
+                                <div class="percentage">${progress.toFixed(0)}%</div>
+                                <div class="outer-bar"><div class="inner-bar" style="width: ${progress}%"></div></div>
+                            </div>
+                        `;
+                        goalsListDiv.appendChild(card);
+                    });
+                } else {
+                    goalsListDiv.innerHTML = '<p style="text-align:center;">No goals found. Add one above!</p>';
+                }
+            } catch (e) { 
+                console.error("Fetch error:", e); 
+            }
+        }
+
+        // --- නව Goal එකක් ඇතුළත් කිරීම ---
+        document.getElementById('add-goal-btn').onclick = async () => {
+            const name = document.getElementById('goal-name').value;
+            const target = document.getElementById('target-amount').value;
+            if (!name || !target) return alert("Please fill in the name and target amount.");
+
+            try {
+                const response = await fetch(`${backendBaseUrl}/add-goal`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
+                    body: JSON.stringify({ userId: auth.currentUser.uid, goalName: name, targetAmount: target })
+                });
+                if (response.ok) {
+                    location.reload(); // සාර්ථක නම් පේජ් එක Refresh කර ඩේටා පෙන්වන්න
+                }
+            } catch (e) {
+                console.error("Error adding goal:", e);
+            }
+        };
+
     </script>
 </body>
 </html>
