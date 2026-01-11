@@ -3,11 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Dashboard - Expense Tracker</title>
+
     <title>My Expense Tracker</title>
+
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
+    <nav style="background: #673ab7; padding: 15px; text-align: center;">
+        <a href="index.html" style="color: white; margin: 10px; text-decoration: none;">🏠 Dashboard</a>
+        <a href="summary.html" style="color: white; margin: 10px; text-decoration: none;">📊 Statistics</a>
+        <a href="goals.html" style="color: white; margin: 10px; text-decoration: none;">🎯 Goals</a>
+        <a href="profile.html" style="color: white; margin: 10px; text-decoration: none;">👤 Profile</a>
+    </nav>
+    <div class="container">
+        <header>
+            <h1>Expense Tracker</h1>
+            <p>Manage your daily spending</p>
+            <div style="display: flex; gap: 10px; justify-content: center; margin-top: 10px;">
+                <button id="view-history-btn" onclick="window.location.href='history.html'" style="background: #2196F3; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer;">View History</button>
+                <button id="logout-btn" style="background: #f44336; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer;">Logout</button>
+            </div>
+
     <nav class="navbar">
     <a href="index.html">🏠 Dashboard</a>
     <a href="summary.html">📊 Statistics</a>
@@ -20,32 +40,54 @@
             <h1>Expense Tracker</h1>
             <p>Keep track of your daily spending</p>
             <button id="logout-btn" class="logout-btn">Logout</button>
+
         </header>
 
         <section class="input-section">
             <form id="transaction-form">
                 <div class="form-control">
                     <label for="text">Expense Name</label>
+
+                    <input type="text" id="text" placeholder="e.g. Lunch" required>
+                </div>
+
                     <input type="text" id="text" placeholder="e.g. Lunch, Bus Ticket..." required>
                 </div>
+
 
                 <div class="form-control">
                     <label for="amount">Amount (LKR)</label>
                     <input type="number" id="amount" placeholder="e.g. 500" required>
                 </div>
 
+                <button type="submit" class="btn" style="background: #673ab7;">Add Transaction</button>
+
+
                 <button type="submit" class="btn">Add Transaction</button>
+
             </form>
         </section>
 
         <section class="list-section">
+
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h3>Current List</h3>
+                <button id="save-to-history-btn" style="background: #4CAF50; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold;">Save to History</button>
+            </div>
+
             <h3>History</h3>
+
             <ul id="list" class="list">
                 </ul>
         </section>
         
+
+        <div class="total-container" style="background: #eee; padding: 20px; border-radius: 10px; text-align: center; margin-top: 20px;">
+            <h4 style="margin: 0;">Total Expense: <span id="total-amount" style="color: #673ab7; font-size: 1.5rem;">Rs. 0.00</span></h4>
+
         <div class="total-container">
             <h4>Total Expense: <span id="total-amount">Rs. 0.00</span></h4>
+
         </div>
     </div>
 

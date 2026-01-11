@@ -2,7 +2,10 @@
 
 :root {
   --box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+
+
   --primary-color: #6c5ce7;
+
 }
 
 * {
@@ -10,6 +13,48 @@
 }
 
 body {
+
+  background-color: #f4f4f4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  font-family: sans-serif;
+}
+nav {
+
+  background: #673ab7;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 60px; /* toolbar height එක same */
+    }
+
+nav a {
+  color: white;
+  text-decoration: none;
+  margin: 0 10px;
+  padding: 10px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  min-width: 120px; /* buttons same width */
+  border-radius: 6px;
+  font-size: 15px;
+      }
+
+nav a:hover 
+{
+  background: rgba(255, 255, 255, 0.2); }
+
+.container {
+  margin: 30px auto;
+  width: 400px;
+
   background-color: #f7f7f7;
   display: flex;
   flex-direction: column;
@@ -25,41 +70,114 @@ body {
   margin: 20px auto;
   width: 100%; /* සම්පූර්ණ පළල ගැනීමට */
   max-width: 450px; /* විශාල ස්ක්‍රීන් වලදී පමණක් සීමා කිරීමට */
+
   box-shadow: var(--box-shadow);
   padding: 20px;
   background-color: #fff;
   border-radius: 10px;
 }
 
+ develop
+
 /* --- Responsive Adjustments --- */
+
 header {
   text-align: center;
   margin-bottom: 20px;
 }
 
 header h1 {
+
+
   font-size: 1.5rem; /* පෝන් එකට ගැලපෙන සයිස් එක */
+
   margin: 0;
   color: #333;
 }
+
+
+header h2 {
+  margin: 0;
+  color: #333;
+}
+
+header p {
+  margin: 5px 0 0;
+  color: #777;
+}
+
+h3 {
+  border-bottom: 1px solid #bbb;
+  padding-bottom: 10px;
+  margin: 20px 0 10px;
+}
+
+h4 {
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.input-section {
+  margin-bottom: 20px;
+}
+
+.form-control {
+  margin-bottom: 10px;
+}
+
+.form-control label {
+  display: block;
+  margin-bottom: 5px;
+  color: #555;
+}
+
+
 
 .form-control input {
   border: 1px solid #dedede;
   border-radius: 5px;
   display: block;
+
+  font-size: 16px;
+  padding: 10px;
+
   font-size: 16px; /* පෝන් එකේදී Zoom වීම වැළැක්වීමට 16px වඩාත් හොඳයි */
   padding: 12px;
+
   width: 100%;
 }
 
 .btn {
   cursor: pointer;
+
+  background-color: #6c5ce7;
+
   background-color: var(--primary-color);
+
   box-shadow: var(--box-shadow);
   color: #fff;
   border: 0;
   display: block;
   font-size: 16px;
+
+  margin: 20px 0 30px;
+  padding: 10px;
+  width: 100%;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+}
+
+.btn:hover {
+  background-color: #5649c0;
+}
+
+.list {
+  list-style-type: none;
+  padding: 0;
+  margin-bottom: 20px;
+}
+
+
   margin: 15px 0;
   padding: 12px;
   width: 100%;
@@ -89,12 +207,57 @@ header h1 {
 
 /* --- ඉතිරි කෝඩ් එක එලෙසම පවතී --- */
 .list { list-style-type: none; padding: 0; margin-bottom: 20px; }
+
 .list li {
   background-color: #fff;
   box-shadow: var(--box-shadow);
   color: #333;
   display: flex;
   justify-content: space-between;
+
+  position: relative;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 5px;
+  border-right: 5px solid #2ecc71; /* Income by default */
+}
+
+.list li.minus {
+  border-right: 5px solid #e74c3c; /* Expense */
+}
+
+.total-container {
+  text-align: right;
+  margin-top: 20px;
+  font-size: 1.2rem;
+}
+
+/* --- Authentication Pages (Login/Register) --- */
+
+.auth-container {
+    max-width: 350px;
+    text-align: center;
+}
+
+.auth-container header {
+    margin-bottom: 30px;
+}
+
+.auth-link {
+    margin-top: 15px;
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.auth-link a {
+    color: #6c5ce7;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.auth-link a:hover {
+    text-decoration: underline;
+
   padding: 10px;
   margin: 10px 0;
   border-radius: 5px;
@@ -160,4 +323,5 @@ header h1 {
     header h1 {
         font-size: 1.5rem;
     }
+
 }
