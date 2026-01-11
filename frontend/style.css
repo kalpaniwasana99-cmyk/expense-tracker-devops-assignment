@@ -17,10 +17,14 @@ body {
   min-height: 100vh;
   margin: 0;
   font-family: 'Poppins', sans-serif;
-  font-family: sans-serif;
+
+  /* mobile friendly */
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 nav {
-
+  flex-wrap: wrap; /* mobile wrap */
   background: #673ab7;
   display: flex;
   justify-content: center;
@@ -31,15 +35,15 @@ nav {
 nav a {
   color: white;
   text-decoration: none;
-  margin: 0 10px;
-  padding: 10px 18px;
+  margin: 5px;
+  padding: 8px 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   height: 40px;
-  min-width: 120px; /* buttons same width */
+  min-width: 100px; /* buttons same width */
   border-radius: 6px;
-  font-size: 15px;
+  font-size: 14px;
       }
 
 nav a:hover 
@@ -47,12 +51,13 @@ nav a:hover
   background: rgba(255, 255, 255, 0.2); }
 
 .container {
-  margin: 30px auto;
-  width: 400px;
+  margin: 20px auto;
+  width: 100px;
   box-shadow: var(--box-shadow);
-  padding: 20px;
+  padding: 16px;
   background-color: #fff;
-  border-radius: 10px;
+  border-radius: 12px;
+  max-width: 420px; /* mobile + desktop */
 }
 
 header {
@@ -105,7 +110,7 @@ h4 {
   border-radius: 5px;
   display: block;
   font-size: 16px;
-  padding: 10px;
+  padding: 12px;
   width: 100%;
 }
 
@@ -118,7 +123,7 @@ h4 {
   display: block;
   font-size: 16px;
   margin: 20px 0 30px;
-  padding: 10px;
+  padding: 12px;
   width: 100%;
   border-radius: 5px;
   transition: background-color 0.3s ease;
@@ -182,4 +187,26 @@ h4 {
 
 .auth-link a:hover {
     text-decoration: underline;
+}
+
+.chart-card {
+  width: 100%;
+  max-width: 320px;
+  margin: 20px auto;
+  padding: 15px;
+}
+
+@media (max-width: 480px) {
+  nav a {
+    min-width: 90px;
+    font-size: 13px;
+  }
+
+  h1, h2 {
+    font-size: 1.3rem;
+  }
+
+  .container {
+    margin: 10px;
+  }
 }
