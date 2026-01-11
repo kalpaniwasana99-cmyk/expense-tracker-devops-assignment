@@ -39,17 +39,20 @@
 
                 // Database එකෙන් එන දත්ත Chart එකට ගැලපෙන විදිහට වෙන් කරගැනීම
                 expenses.forEach(item => {
+                    // අගයන් එකතු කිරීමේදී සිදුවන දෝෂය මඟ හැරීමට parseFloat භාවිතා කරන ලදී
+                    const currentPrice = parseFloat(item.price) || 0; 
                     names.push(item.itemName);
-                    prices.push(item.price);
-                    total += item.price;
+                    prices.push(currentPrice);
+                    total += currentPrice; // දැන් නිවැරදිව එකතු වේ
                 });
 
-                document.getElementById('total-stat').innerText = "Total Expense: Rs. " + total;
+                // මුදල් ප්‍රමාණය කොමා (Commas) සහිතව ලස්සනට පෙන්වීම
+                document.getElementById('total-stat').innerText = "Total Expense: Rs. " + total.toLocaleString();
 
                 // 3. Chart එක නිර්මාණය කිරීම
                 const ctx = document.getElementById('myChart').getContext('2d');
                 new Chart(ctx, {
-                    type: 'pie', // මෙතනට 'doughnut' කියලා දැම්මොත් මැද හිස් රවුමක් එනවා
+                    type: 'pie', 
                     data: {
                         labels: names,
                         datasets: [{
