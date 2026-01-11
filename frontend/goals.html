@@ -1,1 +1,132 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Savings Goals</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .goal-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .progress-container {
+            background: #eee;
+            border-radius: 10px;
+            height: 20px;
+            width: 100%;
+            margin: 10px 0;
+        }
+        .progress-bar {
+            background: #2ecc71;
+            height: 100%;
+            border-radius: 10px;
+            text-align: center;
+            color: white;
+            font-size: 12px;
+            line-height: 20px;
+        }
+    </style>
+</head>
+<body>
+    <nav style="background: #673ab7; padding: 15px; text-align: center;">
+        <a href="index.html" style="color: white; margin: 10px; text-decoration: none;">🏠 Dashboard</a>
+        <a href="goals.html" style="color: white; margin: 10px; text-decoration: none; font-weight: bold;">🎯 Goals</a>
+        <a href="history.html" style="color: white; margin: 10px; text-decoration: none;">📜 History</a>
+    </nav>
+
+    <div class="container">
+        <h1>Savings Goals</h1>
+        
+        <div class="goal-card">
+            <h3>Set New Goal</h3>
+            <form id="goal-form">
+                <input type="text" id="goal-name" placeholder="Goal Name (e.g. New Laptop)" required>
+                <input type="number" id="goal-target" placeholder="Target Amount (Rs.)" required>
+                <button type="submit" style="background: #673ab7; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; width: 100%; margin-top: 10px;">Add Goal</button>
+            </form>
+        </div>
+
+        <div id="goals-list">
+            <p style="text-align: center;">Loading goals...</p>
+        </div>
+    </div>
+
+    <script type="module">
+        // ඔබ ලබාදුන් අලුත්ම URL එක
+        const API_URL = "https://nonfeasibly-nonfavorable-dakota.ngrok-free.dev";
+        const goalsList = document.getElementById('goals-list');
+        const goalForm = document.getElementById('goal-form');
+
+        // --- 1. Goals ලබාගෙන පෙන්වීම ---
+        async function fetchGoals() {
+            try {
+                const response = await fetch(`${API_URL}/get-expenses`, { // දැනට expenses හරහාම පරීක්ෂා කරමු
+                    headers: { 'ngrok-skip-browser-warning': 'true' }
+                });
+                const data = await response.json();
+                
+                goalsList.innerHTML = "";
+                if (data.length === 0) {
+                    goalsList.innerHTML = "<p style='text-align:center;'>No goals set yet.</p>";
+                    return;
+                }
+
+                data.forEach(item => {
+                    const goalCard = document.createElement('div');
+                    goalCard.className = "goal-card";
+                    
+                    // උදාහරණයක් ලෙස progress එක 50% ලෙස පෙන්වමු
+                    const progress = 50; 
+
+                    goalCard.innerHTML = `
+                        <div style="display: flex; justify-content: space-between;">
+                            <strong>${item.itemName}</strong>
+                            <span>Rs. ${item.price}</span>
+                        </div>
+                        <div class="progress-container">
+                            <div class="progress-bar" style="width: ${progress}%">${progress}%</div>
+                        </div>
+                        <small style="color: #666;">Target: Rs. ${item.price}</small>
+                    `;
+                    goalsList.appendChild(goalCard);
+                });
+            } catch (error) {
+                goalsList.innerHTML = "<p style='color:red; text-align:center;'>Error connecting to server.</p>";
+            }
+        }
+
+        // --- 2. අලුත් Goal එකක් සර්වර් එකට යැවීම ---
+        goalForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const text = document.getElementById('goal-name').value;
+            const amount = document.getElementById('goal-target').value;
+
+            try {
+                const response = await fetch(`${API_URL}/add-expense`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'ngrok-skip-browser-warning': 'true' 
+                    },
+                    body: JSON.stringify({ text, amount, uid: "user123", email: "test@mail.com" })
+                });
+
+                if (response.ok) {
+                    document.getElementById('goal-name').value = '';
+                    document.getElementById('goal-target').value = '';
+                    fetchGoals();
+                }
+            } catch (error) {
+                alert("Error adding goal");
+            }
+        });
+
+        fetchGoals();
+    </script>
+</body>
+</html>
