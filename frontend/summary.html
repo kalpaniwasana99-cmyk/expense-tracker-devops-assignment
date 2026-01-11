@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Expense Statistics</title>
@@ -12,6 +13,18 @@
         <a href="summary.html" style="color: white; margin: 10px; text-decoration: none;">📊 Statistics</a>
         <a href="goals.html" style="color: white; margin: 10px; text-decoration: none;">🎯 Goals</a>
         <a href="profile.html" style="color: white; margin: 10px; text-decoration: none;">👤 Profile</a>
+
+    <title>Expense Statistics</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body style="font-family: sans-serif; text-align: center; background-color: #f4f4f4;">
+
+    <nav style="background: #673ab7; padding: 15px; margin-bottom: 20px;">
+        <a href="index.html" style="color: white; margin: 15px; text-decoration: none;">🏠 Dashboard</a>
+        <a href="summary.html" style="color: white; margin: 15px; text-decoration: none;">📊 Statistics</a>
+        <a href="profile.html" style="color: white; margin: 15px; text-decoration: none;">👤 Profile</a>
+        <a href="goals.html" style="color: white; margin: 10px; text-decoration: none;">🎯 Goals</a>
+
     </nav>
 
     <h2>Expense Distribution</h2>
@@ -39,6 +52,7 @@
 
                 // Database එකෙන් එන දත්ත Chart එකට ගැලපෙන විදිහට වෙන් කරගැනීම
                 expenses.forEach(item => {
+
                     // අගයන් එකතු කිරීමේදී සිදුවන දෝෂය මඟ හැරීමට parseFloat භාවිතා කරන ලදී
                     const currentPrice = parseFloat(item.price) || 0; 
                     names.push(item.itemName);
@@ -49,10 +63,22 @@
                 // මුදල් ප්‍රමාණය කොමා (Commas) සහිතව ලස්සනට පෙන්වීම
                 document.getElementById('total-stat').innerText = "Total Expense: Rs. " + total.toLocaleString();
 
+                    names.push(item.itemName);
+                    prices.push(item.price);
+                    total += item.price;
+                });
+
+                document.getElementById('total-stat').innerText = "Total Expense: Rs. " + total;
+
+
                 // 3. Chart එක නිර්මාණය කිරීම
                 const ctx = document.getElementById('myChart').getContext('2d');
                 new Chart(ctx, {
+
                     type: 'pie', 
+
+                    type: 'pie', // මෙතනට 'doughnut' කියලා දැම්මොත් මැද හිස් රවුමක් එනවා
+
                     data: {
                         labels: names,
                         datasets: [{
