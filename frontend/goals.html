@@ -2,30 +2,26 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Smart Savings Goals</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
     <style>
         :root {
             --primary-color: #4361ee;
-            --secondary-color: #3f37c9;
-            --success-color: #4cc9f0;
+            --success-color: #4CAF50;
             --danger-color: #f72585;
             --bg-color: #f8f9fa;
         }
 
         body { font-family: 'Inter', sans-serif; background-color: var(--bg-color); margin: 0; color: #333; }
         
-        /* Professional Navigation */
-        nav { background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); padding: 1rem; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        nav a { color: white; margin: 0 20px; text-decoration: none; font-weight: 600; transition: 0.3s; opacity: 0.9; }
-        nav a:hover { opacity: 1; text-decoration: underline; }
-
         .header-section { padding: 40px 20px; text-align: center; }
         .header-section img { width: 80px; margin-bottom: 15px; }
 
-        .main-container { max-width: 900px; margin: auto; padding: 0 20px 50px; }
+        .main-container { max-width: 800px; margin: auto; padding: 0 20px 50px; }
 
-        /* Goal Input Form Card */
         .form-card {
             background: white; padding: 30px; border-radius: 20px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.05); margin-bottom: 40px;
@@ -34,48 +30,54 @@
         .form-card input {
             padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 15px; outline: none;
         }
-        .form-card input:focus { border-color: var(--primary-color); }
         .add-goal-btn {
             grid-column: span 3; background: var(--primary-color); color: white;
             border: none; padding: 15px; border-radius: 10px; font-weight: bold;
             cursor: pointer; transition: 0.3s; margin-top: 10px;
         }
-        .add-goal-btn:hover { background: var(--secondary-color); transform: translateY(-2px); }
 
-        /* Modern Goal Card */
+        /* Modern Goal Card - WhatsApp Image Style */
         .goal-card {
             background: white; border-radius: 18px; padding: 25px; margin-bottom: 20px;
-            display: flex; align-items: center; justify-content: space-between;
             box-shadow: 0 5px 15px rgba(0,0,0,0.03); transition: 0.3s;
-            border-left: 6px solid var(--primary-color);
+            border-left: 6px solid var(--primary-color); position: relative;
         }
-        .goal-card:hover { transform: scale(1.02); }
-        .goal-details { flex: 1; }
-        .goal-name { font-size: 1.3rem; font-weight: 700; color: #222; margin-bottom: 5px; }
+        .goal-card.achieved { border-left-color: var(--success-color); }
+
+        .goal-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .goal-name { font-size: 1.3rem; font-weight: 700; color: #222; }
+        .goal-percent { font-weight: 800; color: var(--primary-color); font-size: 1.2rem; }
+
         .amount-info { color: #666; font-size: 0.95rem; margin-bottom: 15px; }
 
-        .update-section { display: flex; gap: 10px; align-items: center; }
-        .update-section input { width: 100px; padding: 8px; border-radius: 8px; border: 1px solid #ddd; }
+        .update-section { display: flex; gap: 10px; align-items: center; margin-top: 15px; }
+        .update-section input { width: 80px; padding: 8px; border-radius: 8px; border: 1px solid #ddd; }
         .btn-save { background: #eef2ff; color: var(--primary-color); border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: 600; }
 
-        /* Progress Bar Section */
-        .progress-box { text-align: center; margin: 0 30px; }
-        .outer-bar { width: 150px; height: 10px; background: #eee; border-radius: 10px; overflow: hidden; margin-bottom: 5px; }
+        .outer-bar { width: 100%; height: 10px; background: #eee; border-radius: 10px; overflow: hidden; margin-top: 10px; }
         .inner-bar { height: 100%; background: linear-gradient(90deg, #4cc9f0, #4361ee); transition: 0.5s; }
-        .percentage { font-weight: 800; color: var(--primary-color); font-size: 1.1rem; }
+        .goal-card.achieved .inner-bar { background: var(--success-color); }
 
-        .btn-delete { background: #fff1f2; color: #f43f5e; border: none; padding: 10px; border-radius: 50%; cursor: pointer; transition: 0.3s; }
-        .btn-delete:hover { background: #f43f5e; color: white; }
+        .btn-delete { 
+            position: absolute; right: 15px; top: 50%; transform: translateY(-50%);
+            background: #fff1f2; color: #f43f5e; border: 1px solid #fecaca; 
+            width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-weight: bold;
+        }
 
         .chart-card { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); text-align: center; }
+        
+        @media (max-width: 600px) {
+            .form-grid { grid-template-columns: 1fr; }
+            .add-goal-btn { grid-column: span 1; }
+        }
     </style>
 </head>
 <body>
 
-    <nav>
+    <nav class="navbar">
         <a href="index.html">🏠 Dashboard</a>
         <a href="summary.html">📊 Statistics</a>
-        <a href="goals.html">🎯 Savings Goals</a>
+        <a href="goals.html">🎯 Goals</a>
         <a href="profile.html">👤 Profile</a>
     </nav>
 
@@ -99,7 +101,7 @@
 
         <div class="chart-card">
             <h3>Visual Progress Tracker</h3>
-            <div style="width: 300px; margin: auto;">
+            <div style="width: 280px; margin: auto;">
                 <canvas id="goalsChart"></canvas>
             </div>
         </div>
@@ -110,7 +112,7 @@
         import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
         const goalsListDiv = document.getElementById('goals-list');
-        const backendBaseUrl = "https://nonfeasibly-nonfavorable-dakota.ngrok-free.dev"; // Check this URL
+        const backendBaseUrl = "https://nonfeasibly-nonfavorable-dakota.ngrok-free.dev";
         let goalsChartInstance = null;
 
         onAuthStateChanged(auth, (user) => {
@@ -134,86 +136,70 @@
                         const isAchieved = progress >= 100;
 
                         const card = document.createElement('div');
-                        card.className = 'goal-card';
-                        if(isAchieved) card.style.borderColor = "#4CAF50";
+                        card.className = `goal-card ${isAchieved ? 'achieved' : ''}`;
 
                         card.innerHTML = `
-                            <div class="goal-details">
+                            <div class="goal-top">
                                 <div class="goal-name">${goal.goalName}</div>
-                                <div class="amount-info">Rs. ${goal.savedAmount.toLocaleString()} saved of Rs. ${goal.targetAmount.toLocaleString()}</div>
-                                ${isAchieved ? '<span class="achieved-msg">Goal Achieved! 🎉</span>' : `
-                                <div class="update-section">
-                                    <input type="number" class="amt-input" data-id="${goal.id}" placeholder="Rs.">
-                                    <button class="btn-save upd-trigger" data-id="${goal.id}">Add Saving</button>
-                                </div>`}
+                                <div class="goal-percent">${progress.toFixed(0)}%</div>
                             </div>
-                            <div class="progress-box">
-                                <div class="percentage">${progress.toFixed(0)}%</div>
-                                <div class="outer-bar"><div class="inner-bar" style="width: ${progress}%"></div></div>
-                            </div>
-                            <button class="btn-delete del-trigger" data-id="${goal.id}">✕</button>
+                            <div class="amount-info">Rs. ${goal.savedAmount.toLocaleString()} saved of Rs. ${goal.targetAmount.toLocaleString()}</div>
+                            
+                            <div class="outer-bar"><div class="inner-bar" style="width: ${progress}%"></div></div>
+                            
+                            ${isAchieved ? '<div style="margin-top:10px; font-weight:bold; color:#4CAF50;">Goal Achieved! 🏆</div>' : `
+                            <div class="update-section">
+                                <input type="number" class="amt-input" id="input-${goal.id}" placeholder="Rs.">
+                                <button class="btn-save" onclick="updateSaving('${goal.id}')">Add Saving</button>
+                            </div>`}
+                            
+                            <button class="btn-delete" onclick="deleteGoal('${goal.id}')">✕</button>
                         `;
                         goalsListDiv.appendChild(card);
                         labels.push(goal.goalName); data.push(goal.savedAmount);
                     });
-
-                    // Event Listeners
-                    document.querySelectorAll('.upd-trigger').forEach(btn => {
-                        btn.onclick = () => {
-                            const id = btn.getAttribute('data-id');
-                            const val = document.querySelector(`.amt-input[data-id="${id}"]`).value;
-                            updateProgress(id, val);
-                        };
-                    });
-
-                    document.querySelectorAll('.del-trigger').forEach(btn => {
-                        btn.onclick = () => deleteGoal(btn.getAttribute('data-id'));
-                    });
-
                     updateChart(labels, data);
                 }
             } catch (e) { console.log(e); }
         }
 
-        async function updateProgress(id, val) {
+        // Window functions for button clicks
+        window.updateSaving = async (id) => {
+            const val = document.getElementById(`input-${id}`).value;
             if (!val || val <= 0) return alert("Enter valid amount");
             await fetch(`${backendBaseUrl}/update-goal-progress`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ goalId: id, addingAmount: val })
             });
             location.reload();
-        }
+        };
 
-        async function deleteGoal(id) {
+        window.deleteGoal = async (id) => {
             if (!confirm("Remove this goal?")) return;
-            await fetch(`${backendBaseUrl}/delete-goal/${id}`, { 
-                method: 'DELETE',
-                headers: { 'ngrok-skip-browser-warning': 'true' }
-            });
+            await fetch(`${backendBaseUrl}/delete-goal/${id}`, { method: 'DELETE' });
             location.reload();
-        }
+        };
 
         document.getElementById('add-goal-btn').onclick = async () => {
             const name = document.getElementById('goal-name').value;
             const target = document.getElementById('target-amount').value;
-            if (!name || !target) return alert("Fill required fields");
-
+            if (!name || !target) return alert("Fill fields");
             await fetch(`${backendBaseUrl}/add-goal`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
-                body: JSON.stringify({ userId: auth.currentUser.uid, goalName: name, targetAmount: target, dailySave: 0 })
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId: auth.currentUser.uid, goalName: name, targetAmount: target })
             });
             location.reload();
         };
 
         function updateChart(labels, data) {
-            if (goalsChartInstance) goalsChartInstance.destroy();
             const ctx = document.getElementById('goalsChart').getContext('2d');
+            if (goalsChartInstance) goalsChartInstance.destroy();
             goalsChartInstance = new Chart(ctx, {
                 type: 'doughnut',
-                data: { labels: labels, datasets: [{ data: data, backgroundColor: ['#4361ee', '#4cc9f0', '#4895ef', '#560bad', '#f72585'] }] },
-                options: { cutout: '70%', plugins: { legend: { position: 'bottom' } } }
+                data: { labels: labels, datasets: [{ data: data, backgroundColor: ['#4361ee', '#4cc9f0', '#4895ef'] }] },
+                options: { cutout: '75%', plugins: { legend: { position: 'bottom' } } }
             });
         }
     </script>
