@@ -99,3 +99,44 @@ if (logoutBtn) {
         });
     });
 }
+
+// --- Goals දත්ත Backend එකෙන් ලබා ගැනීම ---
+async function loadGoals() {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    const goalsListDiv = document.getElementById('goals-list');
+    if (!goalsListDiv) return; // Goals පේජ් එකේ නොවේ නම් නවතින්න
+
+    const backendUrl = `https://nonfeasibly-nonfavorable-dakota.ngrok-free.dev/get-goals/${user.uid}`;
+
+    try {
+        const response = await fetch(backendUrl, {
+            headers: { 'ngrok-skip-browser-warning': 'true' }
+        });
+        const result = await response.json();
+        
+        goalsListDiv.innerHTML = '';
+
+        if (result.status === "success") {
+            result.data.forEach(goal => {
+                const progress = Math.min((goal.savedAmount / goal.targetAmount) * 100, 100);
+                const card = document.createElement('div');
+                card.className = 'goal-card';
+                card.innerHTML = `
+                    <div class="goal-details">
+                        <div class="goal-name">${goal.goalName}</div>
+                        <div class="amount-info">Rs. ${goal.savedAmount} saved of Rs. ${goal.targetAmount}</div>
+                    </div>
+                    <div class="progress-box">
+                        <div class="percentage">${progress.toFixed(0)}%</div>
+                        <div class="outer-bar"><div class="inner-bar" style="width: ${progress}%"></div></div>
+                    </div>
+                `;
+                goalsListDiv.appendChild(card);
+            });
+        }
+    } catch (error) {
+        console.log("Goals Error:", error);
+    }
+}
