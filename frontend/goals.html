@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -20,6 +19,7 @@
             height: 20px;
             width: 100%;
             margin: 10px 0;
+            overflow: hidden;
         }
         .progress-bar {
             background: #2ecc71;
@@ -29,6 +29,7 @@
             color: white;
             font-size: 12px;
             line-height: 20px;
+            transition: width 0.5s ease;
         }
     </style>
 </head>
@@ -45,9 +46,9 @@
         <div class="goal-card">
             <h3>Set New Goal</h3>
             <form id="goal-form">
-                <input type="text" id="goal-name" placeholder="Goal Name (e.g. New Laptop)" required>
-                <input type="number" id="goal-target" placeholder="Target Amount (Rs.)" required>
-                <button type="submit" style="background: #673ab7; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; width: 100%; margin-top: 10px;">Add Goal</button>
+                <input type="text" id="goal-name" placeholder="Goal Name (e.g. New Laptop)" required style="width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                <input type="number" id="goal-target" placeholder="Target Amount (Rs.)" required style="width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                <button type="submit" style="background: #673ab7; color: white; border: none; padding: 12px; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold;">Add Goal</button>
             </form>
         </div>
 
@@ -57,20 +58,22 @@
     </div>
 
     <script type="module">
-        // ඔබ ලබාදුන් අලුත්ම URL එක
         const API_URL = "https://nonfeasibly-nonfavorable-dakota.ngrok-free.dev";
         const goalsList = document.getElementById('goals-list');
         const goalForm = document.getElementById('goal-form');
 
-        // --- 1. Goals ලබාගෙන පෙන්වීම ---
+        // --- 1. සර්වර් එකෙන් දත්ත ලබාගෙන ලැයිස්තුගත කිරීම ---
         async function fetchGoals() {
             try {
-                const response = await fetch(`${API_URL}/get-expenses`, { // දැනට expenses හරහාම පරීක්ෂා කරමු
+                const response = await fetch(`${API_URL}/get-expenses`, {
                     headers: { 'ngrok-skip-browser-warning': 'true' }
                 });
-                const data = await response.json();
                 
+                if (!response.ok) throw new Error("Server error");
+                
+                const data = await response.json();
                 goalsList.innerHTML = "";
+
                 if (data.length === 0) {
                     goalsList.innerHTML = "<p style='text-align:center;'>No goals set yet.</p>";
                     return;
@@ -80,23 +83,28 @@
                     const goalCard = document.createElement('div');
                     goalCard.className = "goal-card";
                     
-                    // උදාහරණයක් ලෙස progress එක 50% ලෙස පෙන්වමු
-                    const progress = 50; 
+                    // මෙහිදී අපි උපකල්පනය කරමු ඉලක්කය (Goal) සහ දැනට ඉතිරි කර ඇති මුදල අතර ප්‍රතිශතය 100% කියා 
+                    // (ඔබට අවශ්‍ය පරිදි මෙය ගණනය කිරීමට වෙනත් අගයක් භාවිතා කළ හැක)
+                    const progress = 100; 
 
                     goalCard.innerHTML = `
-                        <div style="display: flex; justify-content: space-between;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
                             <strong>${item.itemName}</strong>
-                            <span>Rs. ${item.price}</span>
+                            <span style="color: #673ab7; font-weight: bold;">Rs. ${parseFloat(item.price).toLocaleString()}</span>
                         </div>
                         <div class="progress-container">
                             <div class="progress-bar" style="width: ${progress}%">${progress}%</div>
                         </div>
-                        <small style="color: #666;">Target: Rs. ${item.price}</small>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 5px;">
+                            <small style="color: #666;">Target met: Rs. ${parseFloat(item.price).toLocaleString()}</small>
+                            <button onclick="deleteGoal('${item.id}')" style="background: none; border: none; color: #f44336; cursor: pointer; font-size: 0.8rem;">Remove</button>
+                        </div>
                     `;
                     goalsList.appendChild(goalCard);
                 });
             } catch (error) {
-                goalsList.innerHTML = "<p style='color:red; text-align:center;'>Error connecting to server.</p>";
+                console.error(error);
+                goalsList.innerHTML = "<p style='color:red; text-align:center;'>Unable to load goals. Make sure backend is running.</p>";
             }
         }
 
@@ -113,18 +121,36 @@
                         'Content-Type': 'application/json',
                         'ngrok-skip-browser-warning': 'true' 
                     },
-                    body: JSON.stringify({ text, amount, uid: "user123", email: "test@mail.com" })
+                    body: JSON.stringify({ 
+                        text: text, 
+                        amount: amount, 
+                        uid: "dev_user", 
+                        email: "dev@example.com" 
+                    })
                 });
 
                 if (response.ok) {
-                    document.getElementById('goal-name').value = '';
-                    document.getElementById('goal-target').value = '';
+                    goalForm.reset();
                     fetchGoals();
                 }
             } catch (error) {
-                alert("Error adding goal");
+                alert("Error connecting to backend");
             }
         });
+
+        // --- 3. Goal එකක් මකා දැමීම ---
+        window.deleteGoal = async (id) => {
+            if (!confirm("Remove this goal?")) return;
+            try {
+                await fetch(`${API_URL}/delete-expense/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'ngrok-skip-browser-warning': 'true' }
+                });
+                fetchGoals();
+            } catch (error) {
+                console.error("Delete error:", error);
+            }
+        };
 
         fetchGoals();
     </script>
