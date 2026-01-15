@@ -11,7 +11,7 @@
     <style>
         body { display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; margin: 0; padding: 20px; }
         .app-container { min-height: 750px; display: flex; flex-direction: column; position: relative; }
-        .stats-scroll-area { flex: 1; padding: 0 25px; margin-bottom: 90px; }
+        .stats-scroll-area { flex: 1; padding: 0 25px; margin-bottom: 90px; overflow-y: auto; }
     </style>
 </head>
 <body>
@@ -21,64 +21,86 @@
             <p style="opacity: 0.8; font-size: 13px;">Understand your spending patterns</p>
         </header>
 
-        <div class="summary-card" style="margin-top: -30px; position: relative; z-index: 10;">
-            <h3 style="margin-bottom: 20px; font-size: 16px; color: #1e293b;">Expense Distribution</h3>
+        <div class="summary-card" style="margin-top: -30px; position: relative; z-index: 10; background: #1e293b; border: 1px solid rgba(255,255,255,0.1);">
+            <h3 style="margin-bottom: 20px; font-size: 16px; color: #ffffff;">Expense Distribution</h3>
             <div style="width: 100%; max-width: 250px; margin: 0 auto;">
                 <canvas id="expenseChart"></canvas>
             </div>
         </div>
 
         <div class="stats-scroll-area">
-            <h3 style="font-size: 18px; color: #1e293b; margin-bottom: 15px; margin-top: 20px;">Key Insights</h3>
-            <div style="display: flex; align-items: center; background: white; padding: 15px; border-radius: 15px; margin-bottom: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
-                <div style="background: #eef2ff; color: #6366f1; width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
+            <h3 style="font-size: 18px; color: #ffffff; margin-bottom: 15px; margin-top: 20px;">Key Insights</h3>
+            <div style="display: flex; align-items: center; background: #1e293b; padding: 15px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1);">
+                <div style="background: rgba(129, 140, 248, 0.1); color: #818cf8; width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
                     <i class="fas fa-arrow-up"></i>
                 </div>
                 <div>
-                    <span style="display: block; font-size: 12px; color: #64748b;">Highest Spending</span>
-                    <strong id="highest-category" style="color: #1e293b;">Food & Drinks</strong>
+                    <span style="display: block; font-size: 12px; color: #94a3b8;">Highest Spending</span>
+                    <strong id="highest-category" style="color: #ffffff;">Loading...</strong>
                 </div>
             </div>
         </div>
 
         <nav class="bottom-nav">
-            <a href="index.html" class="nav-item"><i class="fas fa-home"></i><span>Home</span></a>
-            <a href="summary.html" class="nav-item active"><i class="fas fa-chart-pie"></i><span>Stats</span></a>
-            <a href="goals.html" class="nav-item"><i class="fas fa-bullseye"></i><span>Goals</span></a>
-            <a href="profile.html" class="nav-item"><i class="fas fa-user-circle"></i><span>Profile</span></a>
+            <a href="index.html" class="nav-item"><i class="fas fa-home icon-home"></i><span>Home</span></a>
+            <a href="summary.html" class="nav-item active"><i class="fas fa-chart-pie icon-stats"></i><span>Stats</span></a>
+            <a href="goals.html" class="nav-item"><i class="fas fa-bullseye icon-goals"></i><span>Goals</span></a>
+            <a href="profile.html" class="nav-item"><i class="fas fa-user-circle icon-profile"></i><span>Profile</span></a>
         </nav>
     </div>
-    <script>
-        const API_URL = "https://nonfeasibly-nonfavorable-dakota.ngrok-free.dev";
 
-        async function initChart() {
-            try {
-                // සර්වර් එකෙන් වියදම් දත්ත ලබාගැනීම
-                const response = await fetch(`${API_URL}/get-expenses`, {
-                    headers: { 'ngrok-skip-browser-warning': 'true' }
+    <script type="module">
+        import { auth, db } from "./firebase-config.js";
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { collection, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        let chartInstance = null;
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                const q = query(collection(db, "expenses"), where("uid", "==", user.uid));
+                onSnapshot(q, (snapshot) => {
+                    const dynamicData = {};
+                    snapshot.forEach(doc => {
+                        const item = doc.data();
+                        const name = item.itemName.charAt(0).toUpperCase() + item.itemName.slice(1).toLowerCase();
+                        dynamicData[name] = (dynamicData[name] || 0) + item.price;
+                    });
+                    updateUI(dynamicData);
                 });
-                const data = await response.json();
-                
-                // Chart එක ඇඳීමට අවශ්‍ය logic එක මෙතැනට (දැනට සාම්පල දත්ත භාවිතා වේ)
-                const ctx = document.getElementById('expenseChart').getContext('2d');
-                new Chart(ctx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: ['Food', 'Transport', 'Rent', 'Other'],
-                        datasets: [{
-                            data: [40, 20, 30, 10],
-                            backgroundColor: ['#6366f1', '#a855f7', '#ec4899', '#f59e0b'],
-                            borderWidth: 0
-                        }]
-                    },
-                    options: {
-                        plugins: { legend: { position: 'bottom' } },
-                        cutout: '70%'
-                    }
-                });
-            } catch (err) { console.error("Error loading stats:", err); }
+            } else { window.location.href = "login.html"; }
+        });
+
+        function updateUI(data) {
+            const labels = Object.keys(data);
+            const values = Object.values(data);
+            
+            // Highest Spending Update
+            let highest = { name: 'None', val: 0 };
+            labels.forEach(l => { if(data[l] > highest.val) { highest = { name: l, val: data[l] }; } });
+            document.getElementById('highest-category').innerText = highest.val > 0 ? `${highest.name} (Rs. ${highest.val.toLocaleString()})` : "No Data";
+
+            // Chart Render
+            const ctx = document.getElementById('expenseChart').getContext('2d');
+            if (chartInstance) chartInstance.destroy();
+            chartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: values,
+                        backgroundColor: labels.map(() => `hsl(${Math.random() * 360}, 70%, 60%)`),
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8' } } },
+                    cutout: '70%',
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
         }
-        window.onload = initChart;
     </script>
 </body>
 </html>
