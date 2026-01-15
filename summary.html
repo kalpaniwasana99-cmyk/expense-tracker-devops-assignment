@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Statistics - Expense Tracker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; margin: 0; padding: 20px; }
+        .app-container { min-height: 750px; display: flex; flex-direction: column; position: relative; }
+        .stats-scroll-area { flex: 1; padding: 0 25px; margin-bottom: 90px; }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <header style="padding-bottom: 50px;">
+            <h1 style="margin: 0; font-size: 24px; font-weight: 800;">Analytics</h1>
+            <p style="opacity: 0.8; font-size: 13px;">Understand your spending patterns</p>
+        </header>
+
+        <div class="summary-card" style="margin-top: -30px; position: relative; z-index: 10;">
+            <h3 style="margin-bottom: 20px; font-size: 16px; color: #1e293b;">Expense Distribution</h3>
+            <div style="width: 100%; max-width: 250px; margin: 0 auto;">
+                <canvas id="expenseChart"></canvas>
+            </div>
+        </div>
+
+        <div class="stats-scroll-area">
+            <h3 style="font-size: 18px; color: #1e293b; margin-bottom: 15px; margin-top: 20px;">Key Insights</h3>
+            <div style="display: flex; align-items: center; background: white; padding: 15px; border-radius: 15px; margin-bottom: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                <div style="background: #eef2ff; color: #6366f1; width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
+                    <i class="fas fa-arrow-up"></i>
+                </div>
+                <div>
+                    <span style="display: block; font-size: 12px; color: #64748b;">Highest Spending</span>
+                    <strong id="highest-category" style="color: #1e293b;">Food & Drinks</strong>
+                </div>
+            </div>
+        </div>
+
+        <nav class="bottom-nav">
+            <a href="index.html" class="nav-item"><i class="fas fa-home"></i><span>Home</span></a>
+            <a href="summary.html" class="nav-item active"><i class="fas fa-chart-pie"></i><span>Stats</span></a>
+            <a href="goals.html" class="nav-item"><i class="fas fa-bullseye"></i><span>Goals</span></a>
+            <a href="profile.html" class="nav-item"><i class="fas fa-user-circle"></i><span>Profile</span></a>
+        </nav>
+    </div>
+    <script>
+        const API_URL = "https://nonfeasibly-nonfavorable-dakota.ngrok-free.dev";
+
+        async function initChart() {
+            try {
+                // සර්වර් එකෙන් වියදම් දත්ත ලබාගැනීම
+                const response = await fetch(`${API_URL}/get-expenses`, {
+                    headers: { 'ngrok-skip-browser-warning': 'true' }
+                });
+                const data = await response.json();
+                
+                // Chart එක ඇඳීමට අවශ්‍ය logic එක මෙතැනට (දැනට සාම්පල දත්ත භාවිතා වේ)
+                const ctx = document.getElementById('expenseChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Food', 'Transport', 'Rent', 'Other'],
+                        datasets: [{
+                            data: [40, 20, 30, 10],
+                            backgroundColor: ['#6366f1', '#a855f7', '#ec4899', '#f59e0b'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        plugins: { legend: { position: 'bottom' } },
+                        cutout: '70%'
+                    }
+                });
+            } catch (err) { console.error("Error loading stats:", err); }
+        }
+        window.onload = initChart;
+    </script>
+</body>
+</html>

@@ -1,75 +1,121 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>My Profile</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile - Expense Tracker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; margin: 0; text-align: center; }
-        nav { background: #673ab7; padding: 15px; margin-bottom: 30px; }
-        nav a { color: white; margin: 15px; text-decoration: none; font-weight: bold; }
-        
-        .profile-card {
-            background: white; width: 350px; margin: auto; padding: 30px;
-            border-radius: 20px; box-shadow: 0px 10px 25px rgba(0,0,0,0.1);
+        /* index.html හි උසට සමාන කිරීමට min-height එක් කර ඇත */
+        .app-container {
+            min-height: 750px;
+            display: flex;
+            flex-direction: column;
         }
-        .profile-img { width: 120px; height: 120px; border-radius: 50%; border: 5px solid #673ab7; margin-bottom: 15px; }
-        .user-name { color: #333; margin: 10px 0; font-size: 24px; }
-        .user-email { color: #666; font-size: 16px; margin-bottom: 25px; }
-        
-        .badge {
-            background: #e1bee7; color: #6a1b9a; padding: 5px 15px;
-            border-radius: 20px; font-size: 12px; font-weight: bold;
+        .profile-header {
+            text-align: center;
+            padding: 40px 20px;
+            background: linear-gradient(to bottom, var(--primary), var(--secondary));
+            border-bottom-left-radius: 40px;
+            border-bottom-right-radius: 40px;
+            color: white;
         }
-        .logout-btn {
-            background: #ff5252; color: white; border: none; padding: 10px 25px;
-            border-radius: 10px; cursor: pointer; font-size: 16px; margin-top: 20px;
+        .profile-img-container {
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            background: white;
+            padding: 5px;
+            margin: -55px auto 15px auto;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .profile-img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .info-card {
+            background: white;
+            margin: 15px 25px;
+            padding: 15px 20px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.03);
+            border: 1px solid #f1f5f9;
         }
     </style>
 </head>
 <body>
 
-<nav class="navbar">
-    <a href="index.html">🏠 Dashboard</a>
-    <a href="summary.html">📊 Statistics</a>
-    <a href="goals.html">🎯 Goals</a>
-    <a href="profile.html">👤 Profile</a>
-</nav>
-
-
-    <div class="profile-card">
-        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="avatar" class="profile-img">
-        
-        <div class="badge">ACTIVE USER</div>
-        
-        <h2 class="user-name">Welcome Back!</h2>
-        <p id="user-email" class="user-email">Loading Email...</p>
-        
-        <div style="border-top: 1px solid #eee; padding-top: 20px;">
-            <p style="font-size: 14px; color: #888;">Expense Tracker Version 1.0</p>
-            <p style="font-size: 12px; color: #bbb;">Assignment Project - 2026</p>
+    <div class="app-container">
+        <div class="profile-header">
+            <h2 style="margin: 0; font-size: 22px; font-weight: 800;">My Profile</h2>
+            <p style="font-size: 13px; opacity: 0.8; margin-top: 5px;">Manage your account details</p>
         </div>
 
-        <button id="logout-btn-profile" class="logout-btn">Logout Account</button>
+        <div class="profile-img-container">
+            <img src="https://ui-avatars.com/api/?name=Hasini+Amarathilaka&background=6366f1&color=fff&size=128" alt="Profile" class="profile-img">
+        </div>
+
+        <div style="text-align: center; margin-bottom: 30px;">
+            <h3 style="margin: 0; color: #1e293b; font-size: 20px;">Hasini Amarathilaka</h3>
+            <p style="margin: 5px 0; color: #64748b; font-size: 14px;">hasini@example.com</p>
+        </div>
+
+        <div class="info-card">
+            <i class="fas fa-wallet" style="color: #6366f1; font-size: 18px; margin-right: 15px;"></i>
+            <div>
+                <span style="display: block; font-size: 11px; color: #64748b; text-transform: uppercase;">Account Type</span>
+                <strong style="color: #1e293b; font-size: 14px;">Premium User</strong>
+            </div>
+        </div>
+
+        <div class="info-card">
+            <i class="fas fa-calendar-alt" style="color: #a855f7; font-size: 18px; margin-right: 15px;"></i>
+            <div>
+                <span style="display: block; font-size: 11px; color: #64748b; text-transform: uppercase;">Member Since</span>
+                <strong style="color: #1e293b; font-size: 14px;">January 2026</strong>
+            </div>
+        </div>
+
+        <div class="info-card">
+            <i class="fas fa-shield-alt" style="color: #10b981; font-size: 18px; margin-right: 15px;"></i>
+            <div>
+                <span style="display: block; font-size: 11px; color: #64748b; text-transform: uppercase;">Security</span>
+                <strong style="color: #1e293b; font-size: 14px;">Two-Factor Auth Enabled</strong>
+            </div>
+        </div>
+
+        <div style="padding: 20px 25px;">
+            <button id="logout-btn" style="width: 100%; padding: 15px; border-radius: 15px; border: none; background: #fee2e2; color: #ef4444; font-weight: bold; cursor: pointer; transition: 0.3s;">
+                <i class="fas fa-sign-out-alt"></i> Logout from Account
+            </button>
+        </div>
+
+        <nav class="bottom-nav">
+            <a href="index.html" class="nav-item">
+                <i class="fas fa-home"></i>
+                <span>Home</span>
+            </a>
+            <a href="summary.html" class="nav-item">
+                <i class="fas fa-chart-pie"></i>
+                <span>Stats</span>
+            </a>
+            <a href="goals.html" class="nav-item">
+                <i class="fas fa-bullseye"></i>
+                <span>Goals</span>
+            </a>
+            <a href="profile.html" class="nav-item active">
+                <i class="fas fa-user-circle"></i>
+                <span>Profile</span>
+            </a>
+        </nav>
     </div>
 
-    <script type="module">
-        import { auth } from "./firebase-config.js";
-        import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-
-        // Show User Email from Firebase
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                document.getElementById('user-email').innerText = user.email;
-            } else {
-                window.location.href = "login.html";
-            }
-        });
-
-        // Logout from Profile Page
-        document.getElementById('logout-btn-profile').addEventListener('click', () => {
-            signOut(auth).then(() => {
-                window.location.href = "login.html";
-            });
-        });
-    </script>
+    <script type="module" src="script.js"></script>
 </body>
 </html>
