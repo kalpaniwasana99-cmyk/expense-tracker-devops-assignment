@@ -8,28 +8,30 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
     <style>
-        /* index.html හි උසට සමාන කිරීමට min-height එක් කර ඇත */
         .app-container {
             min-height: 750px;
             display: flex;
             flex-direction: column;
         }
+        /* Black Theme එකට ගැලපෙන සේ සැකසූ Profile Header */
         .profile-header {
             text-align: center;
             padding: 40px 20px;
-            background: linear-gradient(to bottom, var(--primary), var(--secondary));
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
             border-bottom-left-radius: 40px;
             border-bottom-right-radius: 40px;
             color: white;
+            flex-shrink: 0;
         }
         .profile-img-container {
             width: 110px;
             height: 110px;
             border-radius: 50%;
-            background: white;
+            background: #1e293b;
             padding: 5px;
             margin: -55px auto 15px auto;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            border: 2px solid var(--primary);
         }
         .profile-img {
             width: 100%;
@@ -37,15 +39,31 @@
             border-radius: 50%;
             object-fit: cover;
         }
+        /* Black Theme එකට ගැළපෙන Info Cards */
         .info-card {
-            background: white;
-            margin: 15px 25px;
+            background: #1e293b;
+            margin: 10px 25px;
             padding: 15px 20px;
             border-radius: 15px;
             display: flex;
             align-items: center;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.03);
-            border: 1px solid #f1f5f9;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .info-card i {
+            font-size: 18px;
+            margin-right: 15px;
+        }
+        .info-text-main {
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .info-text-label {
+            display: block;
+            font-size: 10px;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
     </style>
 </head>
@@ -58,64 +76,108 @@
         </div>
 
         <div class="profile-img-container">
-            <img src="https://ui-avatars.com/api/?name=Hasini+Amarathilaka&background=6366f1&color=fff&size=128" alt="Profile" class="profile-img">
+            <img id="user-avatar" src="https://ui-avatars.com/api/?name=User&background=6366f1&color=fff" alt="Profile" class="profile-img">
         </div>
 
-        <div style="text-align: center; margin-bottom: 30px;">
-            <h3 style="margin: 0; color: #1e293b; font-size: 20px;">Hasini Amarathilaka</h3>
-            <p style="margin: 5px 0; color: #64748b; font-size: 14px;">hasini@example.com</p>
+        <div style="text-align: center; margin-bottom: 25px;">
+            <h3 id="user-full-name" style="margin: 0; color: #ffffff; font-size: 20px;">Loading...</h3>
+            <p id="user-email-address" style="margin: 5px 0; color: #94a3b8; font-size: 14px;">Please wait</p>
         </div>
 
         <div class="info-card">
-            <i class="fas fa-wallet" style="color: #6366f1; font-size: 18px; margin-right: 15px;"></i>
+            <i class="fas fa-wallet" style="color: #3b82f6;"></i>
             <div>
-                <span style="display: block; font-size: 11px; color: #64748b; text-transform: uppercase;">Account Type</span>
-                <strong style="color: #1e293b; font-size: 14px;">Premium User</strong>
+                <span class="info-text-label">Account Status</span>
+                <strong class="info-text-main">Active User</strong>
             </div>
         </div>
 
         <div class="info-card">
-            <i class="fas fa-calendar-alt" style="color: #a855f7; font-size: 18px; margin-right: 15px;"></i>
+            <i class="fas fa-calendar-alt" style="color: #10b981;"></i>
             <div>
-                <span style="display: block; font-size: 11px; color: #64748b; text-transform: uppercase;">Member Since</span>
-                <strong style="color: #1e293b; font-size: 14px;">January 2026</strong>
+                <span class="info-text-label">Last Login</span>
+                <strong id="last-login-date" class="info-text-main">Today</strong>
             </div>
         </div>
 
         <div class="info-card">
-            <i class="fas fa-shield-alt" style="color: #10b981; font-size: 18px; margin-right: 15px;"></i>
+            <i class="fas fa-shield-alt" style="color: #f59e0b;"></i>
             <div>
-                <span style="display: block; font-size: 11px; color: #64748b; text-transform: uppercase;">Security</span>
-                <strong style="color: #1e293b; font-size: 14px;">Two-Factor Auth Enabled</strong>
+                <span class="info-text-label">Security</span>
+                <strong class="info-text-main">Verified Account</strong>
             </div>
         </div>
 
-        <div style="padding: 20px 25px;">
-            <button id="logout-btn" style="width: 100%; padding: 15px; border-radius: 15px; border: none; background: #fee2e2; color: #ef4444; font-weight: bold; cursor: pointer; transition: 0.3s;">
+        <div style="padding: 20px 25px; margin-top: auto; margin-bottom: 80px;">
+            <button id="profile-logout-btn" style="width: 100%; padding: 15px; border-radius: 15px; border: none; background: rgba(239, 68, 68, 0.1); color: #ef4444; font-weight: 800; cursor: pointer; transition: 0.3s; border: 1px solid rgba(239, 68, 68, 0.2);">
                 <i class="fas fa-sign-out-alt"></i> Logout from Account
             </button>
         </div>
 
         <nav class="bottom-nav">
             <a href="index.html" class="nav-item">
-                <i class="fas fa-home"></i>
+                <i class="fas fa-home icon-home"></i>
                 <span>Home</span>
             </a>
             <a href="summary.html" class="nav-item">
-                <i class="fas fa-chart-pie"></i>
+                <i class="fas fa-chart-pie icon-stats"></i>
                 <span>Stats</span>
             </a>
             <a href="goals.html" class="nav-item">
-                <i class="fas fa-bullseye"></i>
+                <i class="fas fa-bullseye icon-goals"></i>
                 <span>Goals</span>
             </a>
             <a href="profile.html" class="nav-item active">
-                <i class="fas fa-user-circle"></i>
+                <i class="fas fa-user-circle icon-profile"></i>
                 <span>Profile</span>
             </a>
         </nav>
     </div>
 
-    <script type="module" src="script.js"></script>
+    <script type="module">
+        import { auth } from "./firebase-config.js";
+        import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        const userNameEl = document.getElementById('user-full-name');
+        const userEmailEl = document.getElementById('user-email-address');
+        const userAvatarEl = document.getElementById('user-avatar');
+        const logoutBtn = document.getElementById('profile-logout-btn');
+
+        // පරිශීලකයාගේ තොරතුරු ලබා ගැනීම
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                const name = user.displayName || user.email.split('@')[0];
+                const email = user.email;
+
+                // UI යාවත්කාලීන කිරීම
+                userNameEl.innerText = name;
+                userEmailEl.innerText = email;
+                
+                // පරිශීලකයාගේ නම අනුව Avatar එකක් සෑදීම
+                userAvatarEl.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=6366f1&color=fff&size=128&bold=true`;
+                
+                // අද දිනය පෙන්වීම
+                document.getElementById('last-login-date').innerText = new Date().toLocaleDateString('en-GB', {
+                    day: 'numeric', month: 'long', year: 'numeric'
+                });
+            } else {
+                // ලොග් වී නොමැති නම් ලොගින් පිටුවට යැවීම
+                window.location.href = "login.html";
+            }
+        });
+
+        // Logout ක්‍රියාවලිය
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', () => {
+                if(confirm("Are you sure you want to logout?")) {
+                    signOut(auth).then(() => {
+                        window.location.href = "login.html";
+                    }).catch((error) => {
+                        console.error("Logout Error:", error);
+                    });
+                }
+            });
+        }
+    </script>
 </body>
 </html>

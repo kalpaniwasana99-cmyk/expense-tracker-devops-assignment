@@ -12,6 +12,17 @@
         body { display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; margin: 0; padding: 20px; }
         .app-container { min-height: 750px; display: flex; flex-direction: column; position: relative; }
         .stats-scroll-area { flex: 1; padding: 0 25px; margin-bottom: 90px; overflow-y: auto; }
+        
+        /* Dark Theme එකට ගැලපෙන Key Insights Card */
+        .insight-card {
+            display: flex; 
+            align-items: center; 
+            background: #1e293b; 
+            padding: 15px; 
+            border-radius: 15px; 
+            border: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 12px;
+        }
     </style>
 </head>
 <body>
@@ -30,7 +41,8 @@
 
         <div class="stats-scroll-area">
             <h3 style="font-size: 18px; color: #ffffff; margin-bottom: 15px; margin-top: 20px;">Key Insights</h3>
-            <div style="display: flex; align-items: center; background: #1e293b; padding: 15px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1);">
+            
+            <div class="insight-card">
                 <div style="background: rgba(129, 140, 248, 0.1); color: #818cf8; width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
                     <i class="fas fa-arrow-up"></i>
                 </div>
@@ -42,10 +54,22 @@
         </div>
 
         <nav class="bottom-nav">
-            <a href="index.html" class="nav-item"><i class="fas fa-home icon-home"></i><span>Home</span></a>
-            <a href="summary.html" class="nav-item active"><i class="fas fa-chart-pie icon-stats"></i><span>Stats</span></a>
-            <a href="goals.html" class="nav-item"><i class="fas fa-bullseye icon-goals"></i><span>Goals</span></a>
-            <a href="profile.html" class="nav-item"><i class="fas fa-user-circle icon-profile"></i><span>Profile</span></a>
+            <a href="index.html" class="nav-item">
+                <i class="fas fa-home icon-home"></i>
+                <span>Home</span>
+            </a>
+            <a href="summary.html" class="nav-item active">
+                <i class="fas fa-chart-pie icon-stats"></i>
+                <span>Stats</span>
+            </a>
+            <a href="goals.html" class="nav-item">
+                <i class="fas fa-bullseye icon-goals"></i>
+                <span>Goals</span>
+            </a>
+            <a href="profile.html" class="nav-item">
+                <i class="fas fa-user-circle icon-profile"></i>
+                <span>Profile</span>
+            </a>
         </nav>
     </div>
 
@@ -58,43 +82,59 @@
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
+                // පරිශීලකයාට අදාළ වියදම් පමණක් Firestore වෙතින් ලබා ගැනීම
                 const q = query(collection(db, "expenses"), where("uid", "==", user.uid));
+                
+                // රියල් ටයිම් දත්ත වෙනස්වීම් හඳුනාගැනීම
                 onSnapshot(q, (snapshot) => {
                     const dynamicData = {};
                     snapshot.forEach(doc => {
                         const item = doc.data();
                         const name = item.itemName.charAt(0).toUpperCase() + item.itemName.slice(1).toLowerCase();
-                        dynamicData[name] = (dynamicData[name] || 0) + item.price;
+                        dynamicData[name] = (dynamicData[name] || 0) + (parseFloat(item.price) || 0);
                     });
                     updateUI(dynamicData);
                 });
-            } else { window.location.href = "login.html"; }
+            } else { 
+                window.location.href = "login.html"; 
+            }
         });
 
         function updateUI(data) {
             const labels = Object.keys(data);
             const values = Object.values(data);
             
-            // Highest Spending Update
+            // වැඩිම වියදමක් සහිත ප්‍රවර්ගය යාවත්කාලීන කිරීම
             let highest = { name: 'None', val: 0 };
-            labels.forEach(l => { if(data[l] > highest.val) { highest = { name: l, val: data[l] }; } });
+            labels.forEach(l => { 
+                if(data[l] > highest.val) { 
+                    highest = { name: l, val: data[l] }; 
+                } 
+            });
             document.getElementById('highest-category').innerText = highest.val > 0 ? `${highest.name} (Rs. ${highest.val.toLocaleString()})` : "No Data";
 
-            // Chart Render
+            // Chart.js මගින් ප්‍රස්ථාරය ඇඳීම
             const ctx = document.getElementById('expenseChart').getContext('2d');
             if (chartInstance) chartInstance.destroy();
+            
             chartInstance = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
                     labels: labels,
                     datasets: [{
                         data: values,
+                        // අහඹු වර්ණ ලබා දීම
                         backgroundColor: labels.map(() => `hsl(${Math.random() * 360}, 70%, 60%)`),
                         borderWidth: 0
                     }]
                 },
                 options: {
-                    plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8' } } },
+                    plugins: { 
+                        legend: { 
+                            position: 'bottom', 
+                            labels: { color: '#94a3b8', font: { size: 11 } } 
+                        } 
+                    },
                     cutout: '70%',
                     responsive: true,
                     maintainAspectRatio: false

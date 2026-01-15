@@ -8,11 +8,48 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
     <style>
-        .app-container { min-height: 750px; display: flex; flex-direction: column; }
-        .history-list { flex: 1; padding: 0 25px; margin-top: 20px; overflow-y: auto; margin-bottom: 90px; }
-        .date-divider { font-size: 12px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin: 20px 0 10px 0; letter-spacing: 1px; }
-        .delete-btn { background: none; border: none; color: #ef4444; cursor: pointer; padding: 5px; font-size: 14px; opacity: 0.7; }
-        .delete-btn:hover { opacity: 1; }
+        .app-container {
+            min-height: 750px; 
+            max-height: 90vh; /* උස ස්ථාවර කර ස්ක්‍රෝල් වීමට ඉඩ තැබුවා */
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        header { flex-shrink: 0; }
+
+        .history-list {
+            flex: 1;
+            padding: 0 25px;
+            margin-top: 20px;
+            overflow-y: auto;
+            margin-bottom: 80px;
+        }
+
+        /* Scrollbar අලංකාර කිරීම */
+        .history-list::-webkit-scrollbar { width: 5px; }
+        .history-list::-webkit-scrollbar-track { background: transparent; }
+        .history-list::-webkit-scrollbar-thumb { background: #475569; border-radius: 10px; }
+
+        .date-divider {
+            font-size: 12px;
+            font-weight: 800;
+            color: #94a3b8;
+            text-transform: uppercase;
+            margin: 20px 0 10px 0;
+            letter-spacing: 1px;
+        }
+
+        .delete-btn {
+            background: none;
+            border: none;
+            color: #ef4444;
+            cursor: pointer;
+            padding: 8px;
+            transition: 0.2s;
+            opacity: 0.6;
+        }
+        .delete-btn:hover { opacity: 1; transform: scale(1.1); }
     </style>
 </head>
 <body>
@@ -35,10 +72,22 @@
         </div>
 
         <nav class="bottom-nav">
-            <a href="index.html" class="nav-item"><i class="fas fa-home icon-home"></i><span>Home</span></a>
-            <a href="summary.html" class="nav-item"><i class="fas fa-chart-pie icon-stats"></i><span>Stats</span></a>
-            <a href="goals.html" class="nav-item"><i class="fas fa-bullseye icon-goals"></i><span>Goals</span></a>
-            <a href="profile.html" class="nav-item"><i class="fas fa-user-circle icon-profile"></i><span>Profile</span></a>
+            <a href="index.html" class="nav-item">
+                <i class="fas fa-home icon-home"></i>
+                <span>Home</span>
+            </a>
+            <a href="summary.html" class="nav-item">
+                <i class="fas fa-chart-pie icon-stats"></i>
+                <span>Stats</span>
+            </a>
+            <a href="goals.html" class="nav-item">
+                <i class="fas fa-bullseye icon-goals"></i>
+                <span>Goals</span>
+            </a>
+            <a href="profile.html" class="nav-item">
+                <i class="fas fa-user-circle icon-profile"></i>
+                <span>Profile</span>
+            </a>
         </nav>
     </div>
 
@@ -60,6 +109,7 @@
         function listenToFullHistory(uid) {
             const q = query(collection(db, "expenses"), where("uid", "==", uid), orderBy("timestamp", "desc"));
 
+            // Firebase Firestore රියල් ටයිම් ලිසනර් එක
             onSnapshot(q, (snapshot) => {
                 container.innerHTML = snapshot.empty ? 
                     "<p style='text-align:center; color:#94a3b8; margin-top:50px;'>No history found.</p>" : 
@@ -68,6 +118,8 @@
                 snapshot.forEach((docSnap) => {
                     const item = docSnap.data();
                     const card = document.createElement('div');
+                    
+                    // Black Theme එකට ගැලපෙන Style එක
                     card.setAttribute('style', 'display: flex !important; justify-content: space-between !important; align-items: center !important; background: transparent !important; padding: 15px 0 !important; border-bottom: 1px solid rgba(255,255,255,0.1) !important;');
                     
                     card.innerHTML = `
@@ -89,9 +141,15 @@
             });
         }
 
+        // Firebase හරහා මකා දැමීමේ Function එක
         window.deleteHistoryItem = async function(id) {
             if (confirm("Delete this record permanently?")) {
-                await deleteDoc(doc(db, "expenses", id));
+                try {
+                    await deleteDoc(doc(db, "expenses", id));
+                } catch (error) {
+                    console.error("Error deleting:", error);
+                    alert("Failed to delete record.");
+                }
             }
         }
     </script>
