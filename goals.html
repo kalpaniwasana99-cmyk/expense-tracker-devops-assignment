@@ -29,7 +29,6 @@
             overflow-y: auto;
         }
 
-        /* Savings Input Area */
         .add-savings-box {
             display: flex;
             gap: 8px;
@@ -67,7 +66,6 @@
         }
         .btn-delete:hover { opacity: 0.7; }
 
-        /* Custom Scrollbar */
         .goals-scroll-area::-webkit-scrollbar { width: 5px; }
         .goals-scroll-area::-webkit-scrollbar-track { background: transparent; }
         .goals-scroll-area::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
@@ -98,12 +96,24 @@
             <div id="goals-list-container"></div>
         </div>
 
-        <nav class="bottom-nav">
-            <a href="index.html" class="nav-item"><i class="fas fa-home"></i><span>Home</span></a>
-            <a href="summary.html" class="nav-item"><i class="fas fa-chart-pie"></i><span>Stats</span></a>
-            <a href="goals.html" class="nav-item active"><i class="fas fa-bullseye"></i><span>Goals</span></a>
-            <a href="profile.html" class="nav-item"><i class="fas fa-user-circle"></i><span>Profile</span></a>
-        </nav>
+       <nav class="bottom-nav">
+    <a href="index.html" class="nav-item">
+        <i class="fas fa-home icon-home"></i>
+        <span>Home</span>
+    </a>
+    <a href="summary.html" class="nav-item">
+        <i class="fas fa-chart-pie icon-stats"></i>
+        <span>Stats</span>
+    </a>
+    <a href="goals.html" class="nav-item active">
+        <i class="fas fa-bullseye icon-goals"></i>
+        <span>Goals</span>
+    </a>
+    <a href="profile.html" class="nav-item">
+        <i class="fas fa-user-circle icon-profile"></i>
+        <span>Profile</span>
+    </a>
+</nav>
     </div>
 
     <script>
@@ -119,15 +129,19 @@
                 container.innerHTML = '';
 
                 goals.forEach(goal => {
-                    const current = goal.currentSaved || 0;
-                    const progress = (current / goal.targetAmount) * 100;
+                    // අගයන් parseFloat කර තහවුරු කරගැනීම
+                    const current = parseFloat(goal.currentSaved || 0);
+                    const target = parseFloat(goal.targetAmount || 1);
+                    const progress = (current / target) * 100;
                     
                     container.innerHTML += `
                         <div style="background: white; padding: 15px; border-radius: 15px; margin-bottom: 15px; border: 1px solid #f1f5f9; box-shadow: 0 2px 5px rgba(0,0,0,0.02);">
                             <div style="display: flex; justify-content: space-between; margin-bottom: 8px; align-items: center;">
                                 <div>
                                     <strong style="font-size: 14px;">${goal.goalName}</strong>
-                                    <div style="font-size: 11px; color: #64748b;">Saved: LKR ${current} / ${goal.targetAmount}</div>
+                                    <div style="font-size: 11px; color: #64748b;">
+                                        Saved: LKR ${current.toLocaleString()} / ${target.toLocaleString()}
+                                    </div>
                                 </div>
                                 <div style="display: flex; align-items: center; gap: 10px;">
                                     <span style="font-size: 12px; color: #6366f1; font-weight: 800;">${progress.toFixed(0)}%</span>
@@ -160,7 +174,7 @@
                 await fetch(`${API_URL}/add-goal`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ goalName: name, targetAmount: target, currentSaved: 0 })
+                    body: JSON.stringify({ goalName: name, targetAmount: parseFloat(target), currentSaved: 0 })
                 });
                 document.getElementById('goal-name').value = '';
                 document.getElementById('target-amount').value = '';
@@ -183,7 +197,7 @@
 
                 if (response.ok) {
                     amountInput.value = '';
-                    loadGoals();
+                    loadGoals(); // මෙතැනදී සම්පූර්ණ ලැයිස්තුවම නැවත refresh වී අලුත් අගයන් පෙන්වයි
                 } else {
                     alert("Failed to update savings.");
                 }

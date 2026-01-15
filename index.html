@@ -8,44 +8,21 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
     <style>
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px;
-        }
-
-        .app-container {
-            min-height: 750px; 
-            max-height: 750px; /* උස ස්ථාවර කළා */
-            display: flex;
-            flex-direction: column;
-            position: relative;
-            overflow: hidden; /* මුළු ඇප් එකම ස්ක්‍රෝල් වීම වැළැක්වීමට */
-        }
-
+        body { display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; margin: 0; padding: 20px; }
+        .app-container { min-height: 750px; max-height: 750px; display: flex; flex-direction: column; position: relative; overflow: hidden; }
         header { padding-bottom: 20px; flex-shrink: 0; }
         .summary-card { margin-top: 0px; padding: 20px; border-radius: 20px; flex-shrink: 0; }
         .input-group { padding: 15px 25px; flex-shrink: 0; }
-
-        /* Scroll Area එක පාලනය කිරීම */
-        .scroll-area {
-            flex: 1;
-            padding: 0 25px;
-            margin-bottom: 90px;
-            overflow-y: auto; /* මෙතැනදී ස්ක්‍රෝල් බාර් එක වැඩ කරයි */
-        }
-
-        /* Scrollbar එක අලංකාර කිරීමට (Custom Scrollbar) */
+        .scroll-area { flex: 1; padding: 0 25px; margin-bottom: 90px; overflow-y: auto; }
+        #list { list-style: none; padding: 0; margin: 0; background: transparent !important; }
+        #list li { background: none !important; background-color: transparent !important; box-shadow: none !important; border: none !important; border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important; display: flex; justify-content: space-between; align-items: center; padding: 12px 10px; margin-bottom: 0; color: #1e293b; }
+        .delete-btn { background-color: #fee2e2; color: #ef4444; border: none; padding: 5px 8px; border-radius: 5px; cursor: pointer; font-size: 12px; }
         .scroll-area::-webkit-scrollbar { width: 5px; }
         .scroll-area::-webkit-scrollbar-track { background: transparent; }
         .scroll-area::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
     </style>
 </head>
 <body>
-
     <div class="app-container">
         <header>
             <div class="user-info" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
@@ -83,22 +60,32 @@
         </div>
 
         <div class="scroll-area">
-            <h3 style="margin: 15px 0 10px 0; font-size: 17px; color: #1e293b;">Recent Transactions</h3>
-            <ul id="list" class="list" style="list-style: none; padding: 0; margin: 0;"></ul>
+            <h3 style="margin: 15px 0 10px 0; font-size: 17px; color: #edeff3;">Recent Transactions</h3>
+            <ul id="list" class="list"></ul>
         </div>
 
         <nav class="bottom-nav">
-            <a href="index.html" class="nav-item active"><i class="fas fa-home"></i><span>Home</span></a>
-            <a href="summary.html" class="nav-item"><i class="fas fa-chart-pie"></i><span>Stats</span></a>
-            <a href="goals.html" class="nav-item"><i class="fas fa-bullseye"></i><span>Goals</span></a>
-            <a href="profile.html" class="nav-item"><i class="fas fa-user-circle"></i><span>Profile</span></a>
+            <a href="index.html" class="nav-item active">
+                <i class="fas fa-home icon-home"></i>
+                <span>Home</span>
+            </a>
+            <a href="summary.html" class="nav-item">
+                <i class="fas fa-chart-pie icon-stats"></i>
+                <span>Stats</span>
+            </a>
+            <a href="goals.html" class="nav-item">
+                <i class="fas fa-bullseye icon-goals"></i>
+                <span>Goals</span>
+            </a>
+            <a href="profile.html" class="nav-item">
+                <i class="fas fa-user-circle icon-profile"></i>
+                <span>Profile</span>
+            </a>
         </nav>
     </div>
 
     <script type="module" src="script.js"></script>
     <script>
-        // API URL එක script.js එක ඇතුළේ තිබිය යුතුය. 
-        // නමුත් පහසුව සඳහා මෙහිදීද Define කළ හැක (script.js එකේ නැතිනම් පමණක්).
         window.API_URL = "https://nonfeasibly-nonfavorable-dakota.ngrok-free.dev";
     </script>
 </body>

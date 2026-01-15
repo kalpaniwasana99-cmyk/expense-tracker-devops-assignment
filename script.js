@@ -22,7 +22,6 @@ onAuthStateChanged(auth, (user) => {
 
 async function loadOldExpenses() {
     try {
-        console.log("Fetching data...");
         const response = await fetch(`${API_URL}/get-expenses`, {
             headers: { 'ngrok-skip-browser-warning': 'true' }
         });
@@ -36,7 +35,9 @@ async function loadOldExpenses() {
             data.forEach(item => {
                 total += parseFloat(item.price);
                 const li = document.createElement('li');
-                li.style = "display: flex; justify-content: space-between; align-items: center; background: white; padding: 15px; border-radius: 15px; margin-bottom: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); border-left: 5px solid #6366f1;";
+                
+                // --- ශක්තිමත් කළ කොටස: !important වැනි බලපෑමක් ඇති කරයි ---
+                li.setAttribute('style', 'display: flex !important; justify-content: space-between !important; align-items: center !important; background: transparent !important; background-color: transparent !important; padding: 12px 0 !important; margin-bottom: 0 !important; border-bottom: 1px solid rgba(0,0,0,0.05) !important; box-shadow: none !important;');
                 
                 li.innerHTML = `
                     <div style="flex: 1;">
@@ -50,12 +51,11 @@ async function loadOldExpenses() {
                 list.appendChild(li);
             });
 
-            // Delete බොත්තම් වලට Event Listeners එකතු කිරීම
             document.querySelectorAll('.delete-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
+                btn.onclick = (e) => {
                     const id = e.currentTarget.getAttribute('data-id');
                     deleteExpense(id);
-                });
+                };
             });
 
         } else {
@@ -67,11 +67,9 @@ async function loadOldExpenses() {
         }
     } catch (error) { 
         console.error("Load Error:", error);
-        list.innerHTML = "<p style='text-align:center; color:red; font-size:12px;'>Error connecting to Server.</p>";
     }
 }
 
-// Delete Function එක Global Scope එකෙන් ඉවත් කර ආරක්ෂිතව සැකසීම
 async function deleteExpense(id) {
     if (!confirm("Delete this transaction?")) return;
     try {
@@ -84,7 +82,7 @@ async function deleteExpense(id) {
 }
 
 if (transactionForm) {
-    transactionForm.addEventListener('submit', async (e) => {
+    transactionForm.onsubmit = async (e) => {
         e.preventDefault();
         const textInput = document.getElementById('text');
         const amountInput = document.getElementById('amount');
@@ -107,11 +105,11 @@ if (transactionForm) {
                 loadOldExpenses(); 
             } catch (error) { console.log("Add Error:", error); }
         }
-    });
+    };
 }
 
 if (logoutBtn) {
-    logoutBtn.addEventListener('click', () => {
+    logoutBtn.onclick = () => {
         signOut(auth).then(() => { window.location.href = "login.html"; });
-    });
+    };
 }
