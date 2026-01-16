@@ -10,7 +10,7 @@
     <style>
         .app-container {
             min-height: 750px; 
-            max-height: 750px; /* උස ස්ථාවර කර ස්ක්‍රෝල් වීමට ඉඩ තැබුවා */
+            max-height: 750px; 
             display: flex;
             flex-direction: column;
             overflow: hidden;
@@ -22,11 +22,11 @@
             flex: 1;
             padding: 0 25px;
             margin-top: 20px;
-            overflow-y: auto; /* Scrollbar එක පණ ගැන්වීම */
+            overflow-y: auto; /* Scrollbar*/
             margin-bottom: 90px;
         }
 
-        /* Scrollbar අලංකාර කිරීම */
+        /* Scrollbar modification */
         .history-list::-webkit-scrollbar { width: 5px; }
         .history-list::-webkit-scrollbar-track { background: transparent; }
         .history-list::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
@@ -148,7 +148,7 @@
             }
         }
 
-        // මකා දැමීමේ Function එක
+        // delete Function
         window.deleteRecord = async function(id) {
             if (!confirm("Are you sure you want to delete this record?")) return;
 
@@ -159,7 +159,7 @@
                 });
 
                 if (response.ok) {
-                    loadFullHistory(); // සාර්ථකව මැකුණු පසු නැවත Load කරන්න
+                    loadFullHistory(); // again reload 
                 } else {
                     alert("Failed to delete record.");
                 }

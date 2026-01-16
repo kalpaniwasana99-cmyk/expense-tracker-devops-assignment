@@ -13,14 +13,14 @@
             display: flex;
             flex-direction: column;
         }
-        /* Black Theme එකට ගැලපෙන සේ සැකසූ Profile Header */
+       
         .profile-header {
             text-align: center;
             padding: 40px 20px;
-            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            background: linear-gradient(135deg, #159698 0%, #040e30 100%);
             border-bottom-left-radius: 40px;
             border-bottom-right-radius: 40px;
-            color: white;
+            color: rgb(238, 227, 227);
             flex-shrink: 0;
         }
         .profile-img-container {
@@ -39,7 +39,7 @@
             border-radius: 50%;
             object-fit: cover;
         }
-        /* Black Theme එකට ගැළපෙන Info Cards */
+        /* match to Black Theme Info Cards */
         .info-card {
             background: #1e293b;
             margin: 10px 25px;
@@ -54,14 +54,14 @@
             margin-right: 15px;
         }
         .info-text-main {
-            color: #ffffff;
+            color: #ebdddd;
             font-size: 14px;
             font-weight: 600;
         }
         .info-text-label {
             display: block;
             font-size: 10px;
-            color: #94a3b8;
+            color: #dfddd9;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
@@ -70,7 +70,7 @@
 <body>
 
     <div class="app-container">
-        <div class="profile-header">
+        <div class="profile-header"><i class="fas fa-id-card" style="font-size:18px; opacity:0.8;"></i>
             <h2 style="margin: 0; font-size: 22px; font-weight: 800;">My Profile</h2>
             <p style="font-size: 13px; opacity: 0.8; margin-top: 5px;">Manage your account details</p>
         </div>
@@ -80,8 +80,8 @@
         </div>
 
         <div style="text-align: center; margin-bottom: 25px;">
-            <h3 id="user-full-name" style="margin: 0; color: #ffffff; font-size: 20px;">Loading...</h3>
-            <p id="user-email-address" style="margin: 5px 0; color: #94a3b8; font-size: 14px;">Please wait</p>
+            <h3 id="user-full-name" style="margin: 0; color: #636060; font-size: 20px;">Loading...</h3>
+            <p id="user-email-address" style="margin: 5px 0; color: #26242f; font-size: 14px;">Please wait</p>
         </div>
 
         <div class="info-card">
@@ -143,30 +143,29 @@
         const userAvatarEl = document.getElementById('user-avatar');
         const logoutBtn = document.getElementById('profile-logout-btn');
 
-        // පරිශීලකයාගේ තොරතුරු ලබා ගැනීම
+        // 
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 const name = user.displayName || user.email.split('@')[0];
                 const email = user.email;
 
-                // UI යාවත්කාලීන කිරීම
+                // UI update
                 userNameEl.innerText = name;
                 userEmailEl.innerText = email;
                 
-                // පරිශීලකයාගේ නම අනුව Avatar එකක් සෑදීම
                 userAvatarEl.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=6366f1&color=fff&size=128&bold=true`;
                 
-                // අද දිනය පෙන්වීම
+                // show date
                 document.getElementById('last-login-date').innerText = new Date().toLocaleDateString('en-GB', {
                     day: 'numeric', month: 'long', year: 'numeric'
                 });
             } else {
-                // ලොග් වී නොමැති නම් ලොගින් පිටුවට යැවීම
+                // if user do not login then user go to register page
                 window.location.href = "login.html";
             }
         });
 
-        // Logout ක්‍රියාවලිය
+        // Logout process
         if (logoutBtn) {
             logoutBtn.addEventListener('click', () => {
                 if(confirm("Are you sure you want to logout?")) {

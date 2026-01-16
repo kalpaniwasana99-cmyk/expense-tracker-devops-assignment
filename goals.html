@@ -76,8 +76,8 @@
         <header>
             <div class="user-info" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                 <span style="font-weight: 600; font-size: 14px; opacity: 0.9;">Savings Planner</span>
-                <i class="fas fa-piggy-bank" style="font-size: 18px; opacity: 0.8;"></i>
             </div>
+            <i class="fas fa-piggy-bank" style="font-size: 18px; opacity: 0.8;"></i>
             <h1 style="margin: 0; font-size: 28px; font-weight: 800;">Savings Goals</h1>
             <p style="opacity: 0.8; font-size: 14px;">Smartly save for your future dreams</p>
         </header>
@@ -92,7 +92,7 @@
         </div>
 
         <div class="goals-scroll-area">
-            <h3 style="margin: 20px 0 15px 0; font-size: 18px; color: #1e293b;">Goal Progress</h3>
+            <h3 style="margin: 20px 0 15px 0; font-size: 18px; color: #03070f;">Goal Progress</h3>
             <div id="goals-list-container"></div>
         </div>
 
@@ -197,7 +197,7 @@
 
                 if (response.ok) {
                     amountInput.value = '';
-                    loadGoals(); // මෙතැනදී සම්පූර්ණ ලැයිස්තුවම නැවත refresh වී අලුත් අගයන් පෙන්වයි
+                    loadGoals(); // refresh and show new values
                 } else {
                     alert("Failed to update savings.");
                 }

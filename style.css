@@ -1,11 +1,11 @@
 :root {
     --primary: #818cf8; 
-    --secondary: #c084fc;
-    --bg-dark: #424f6f; 
-    --container-bg: #12171c; 
-    --card-bg: #b8bdc5; 
+    --secondary: #cebae3;
+    --bg-dark: #050505; 
+    --container-bg: #f8f9fb; 
+    --card-bg: linear-gradient(135deg, #64c06f 0%, #1568c8 100%); 
     --text-main: #ffffff; 
-    --text-muted: #517fc0; /* Inactive අකුරු සඳහා පැහැදිලි අළු වර්ණයක් */
+    --text-muted: #e1e6ee; /* Inactive letters for gray color*/
     --border: rgba(117, 54, 54, 0.086);
 }
 
@@ -19,6 +19,7 @@ body {
     margin: 0;
     padding: 20px;
     color: var(--text-main);
+    
 }
 
 .app-container {
@@ -36,7 +37,7 @@ body {
 }
 
 header {
-    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    background: linear-gradient(135deg, #159698 0%, #040e30 100%);
     color: #ffffff !important;
     padding: 30px 20px;
     text-align: center;
@@ -55,7 +56,7 @@ header p, header span {
 }
 
 .form-control label {
-    color: #cbd5e1 !important;
+    color: #0d0e0e !important;
     font-weight: 600;
 }
 
@@ -63,12 +64,12 @@ input {
     width: 100%;
     padding: 15px;
     margin-bottom: 15px;
-    background: #085c55;
-    border: 1px solid #104693;
+    background: #dff0ee;
+    border: 1px solid #226cd5;
     border-radius: 12px;
     box-sizing: border-box;
     font-size: 16px;
-    color: #ffffff !important;
+    color: #222020 !important;
     transition: 0.3s;
 }
 
@@ -98,13 +99,13 @@ input::placeholder {
 }
 
 .summary-card span {
-    color: #1e293b !important; /* Card labels අඳුරු කර පෙන්වීමට */
+    color: #1e293b !important; /* show dark to Card labels */
 }
 
 .total-amount {
     font-size: 32px;
     font-weight: 800;
-    color: #1e293b !important; /* Card amount අඳුරු කර පෙන්වීමට */
+    color: #1e293b !important; /* show dark to Card amount */
 }
 
 .scroll-area, .goals-scroll-area, .stats-scroll-area, .history-list {
@@ -151,17 +152,17 @@ input::placeholder {
     transition: all 0.3s ease;
 }
 
-/* Inactive අකුරු වර්ණය */
+/* Inactive font color */
 .nav-item span {
-    color: var(--text-muted) !important; /* Home, Stats, Profile labels අළු පැහැයෙන් */
+    color: var(--text-muted) !important; /* Home, Stats, Profile labels in gray color*/
     font-size: 11px;
     margin-top: 2px;
     transition: color 0.3s ease;
 }
 
-/* Active අකුරු වර්ණය (සුදු) */
+/* Active font in white color */
 .nav-item.active span {
-    color: #ffffff !important; /* දැනට සිටින පිටුවේ නම සුදු පැහැයෙන් */
+    color: #ffffff !important; 
     font-weight: 800;
 }
 
@@ -169,12 +170,12 @@ input::placeholder {
     font-size: 20px;
     margin-bottom: 4px;
     transition: transform 0.3s ease, filter 0.3s ease;
-    filter: saturate(0.5) opacity(0.7); /* Inactive අයිකන වල දීප්තිය අඩුයි */
+    filter: saturate(0.5) opacity(0.7);
 }
 
-/* Active අයිකන වල දීප්තිය වැඩි කිරීම */
+
 .nav-item.active i {
-    filter: saturate(1.5) brightness(1.2) !important;
+    filter: saturate(1.5) brightness(1.5) !important;
     transform: translateY(-3px);
 }
 
@@ -193,3 +194,4 @@ input::placeholder {
     body { padding: 0; }
     .app-container { max-width: 100%; min-height: 100vh; border-radius: 0; }
 }
+

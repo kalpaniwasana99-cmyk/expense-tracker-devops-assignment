@@ -13,7 +13,7 @@ const serviceAccount = require('./serviceAccountKey.json');
 admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
 const db = admin.firestore();
 
-// 1. දත්ත ලබා ගැනීම
+// 1. give to data
 app.get('/get-expenses', async (req, res) => {
     try {
         const snapshot = await db.collection('expenses').orderBy('timestamp', 'desc').get();
@@ -23,7 +23,7 @@ app.get('/get-expenses', async (req, res) => {
     } catch (error) { res.status(500).json({ error: error.message }); }
 });
 
-// 2. දත්ත ඇතුළත් කිරීම
+// 2. insert data
 app.post('/add-expense', async (req, res) => {
     try {
         const { text, amount, uid, email } = req.body;
@@ -38,7 +38,7 @@ app.post('/add-expense', async (req, res) => {
     } catch (error) { res.status(500).json({ error: error.message }); }
 });
 
-// 3. දත්ත මකා දැමීම
+// 3.erace data
 app.delete('/delete-expense/:id', async (req, res) => {
     try {
         await db.collection('expenses').doc(req.params.id).delete();
