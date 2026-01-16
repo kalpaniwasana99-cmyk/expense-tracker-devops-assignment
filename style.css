@@ -116,16 +116,16 @@ input::placeholder {
 }
 
 #list li, .history-list div, .goals-scroll-area div {
-    color: #ffffff !important;
+    color: #180303 !important;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
 }
 
 #list li span, .history-list div span {
-    color: #ffffff !important;
+    color: #350404 !important;
 }
 
 #list li small, .history-list div small, .goals-scroll-area small {
-    color: #94a3b8 !important;
+    color: #391605 !important;
 }
 
 /* ==========================================

@@ -10,11 +10,7 @@
     <style>
         .app-container {
             min-height: 750px; 
-<<<<<<< HEAD
-            max-height: 750px; 
-=======
-            max-height: 90vh; /* උස ස්ථාවර කර ස්ක්‍රෝල් වීමට ඉඩ තැබුවා */
->>>>>>> 8f7e78f16771f4e27fd6775ad2f490bddd2ce5ce
+            max-height: 90vh; /* Fixed height with scroll support */
             display: flex;
             flex-direction: column;
             overflow: hidden;
@@ -26,16 +22,11 @@
             flex: 1;
             padding: 0 25px;
             margin-top: 20px;
-<<<<<<< HEAD
-            overflow-y: auto; /* Scrollbar*/
-            margin-bottom: 90px;
-=======
-            overflow-y: auto;
+            overflow-y: auto; /* Enable vertical scrolling */
             margin-bottom: 80px;
->>>>>>> 8f7e78f16771f4e27fd6775ad2f490bddd2ce5ce
         }
 
-        /* Scrollbar modification */
+        /* Custom Scrollbar Styles */
         .history-list::-webkit-scrollbar { width: 5px; }
         .history-list::-webkit-scrollbar-track { background: transparent; }
         .history-list::-webkit-scrollbar-thumb { background: #475569; border-radius: 10px; }
@@ -76,7 +67,7 @@
 
         <div class="history-list">
             <div id="history-container">
-                <p style="text-align:center; color:#94a3b8; margin-top:50px;">Loading history...</p>
+                <p style="text-align:center; color:#0e0f12; margin-top:50px;">Loading history...</p>
             </div>
         </div>
 
@@ -107,6 +98,7 @@
 
         const container = document.getElementById('history-container');
 
+        // Check user authentication status
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 listenToFullHistory(user.uid);
@@ -115,10 +107,11 @@
             }
         });
 
+        // Function to listen for real-time updates in Firestore
         function listenToFullHistory(uid) {
             const q = query(collection(db, "expenses"), where("uid", "==", uid), orderBy("timestamp", "desc"));
 
-            // Firebase Firestore රියල් ටයිම් ලිසනර් එක
+            // Firestore Real-time Listener
             onSnapshot(q, (snapshot) => {
                 container.innerHTML = snapshot.empty ? 
                     "<p style='text-align:center; color:#94a3b8; margin-top:50px;'>No history found.</p>" : 
@@ -128,7 +121,7 @@
                     const item = docSnap.data();
                     const card = document.createElement('div');
                     
-                    // Black Theme එකට ගැලපෙන Style එක
+                    // Style matching the Black Theme
                     card.setAttribute('style', 'display: flex !important; justify-content: space-between !important; align-items: center !important; background: transparent !important; padding: 15px 0 !important; border-bottom: 1px solid rgba(255,255,255,0.1) !important;');
                     
                     card.innerHTML = `
@@ -150,29 +143,13 @@
             });
         }
 
-<<<<<<< HEAD
-        // delete Function
-        window.deleteRecord = async function(id) {
-            if (!confirm("Are you sure you want to delete this record?")) return;
-
-            try {
-                const response = await fetch(`${API_URL}/delete-expense/${id}`, {
-                    method: 'DELETE',
-                    headers: { 'ngrok-skip-browser-warning': 'true' }
-                });
-
-                if (response.ok) {
-                    loadFullHistory(); // again reload 
-                } else {
-=======
-        // Firebase හරහා මකා දැමීමේ Function එක
+        // Function to delete record via Firebase
         window.deleteHistoryItem = async function(id) {
             if (confirm("Delete this record permanently?")) {
                 try {
                     await deleteDoc(doc(db, "expenses", id));
                 } catch (error) {
-                    console.error("Error deleting:", error);
->>>>>>> 8f7e78f16771f4e27fd6775ad2f490bddd2ce5ce
+                    console.error("Error deleting document:", error);
                     alert("Failed to delete record.");
                 }
             }

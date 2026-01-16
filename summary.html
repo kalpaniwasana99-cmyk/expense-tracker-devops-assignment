@@ -10,10 +10,23 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body { display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; margin: 0; padding: 20px; }
-        .app-container { min-height: 750px; display: flex; flex-direction: column; position: relative; }
-        .stats-scroll-area { flex: 1; padding: 0 25px; margin-bottom: 90px; overflow-y: auto; }
         
-        /* Dark Theme එකට ගැලපෙන Key Insights Card */
+        .app-container { 
+            min-height: 750px; 
+            display: flex; 
+            flex-direction: column; 
+            position: relative; 
+            overflow: hidden;
+        }
+
+        .stats-scroll-area { 
+            flex: 1; 
+            padding: 0 25px; 
+            margin-bottom: 90px; 
+            overflow-y: auto; 
+        }
+        
+        /* Consistent Insight Cards for Dark Theme */
         .insight-card {
             display: flex; 
             align-items: center; 
@@ -23,33 +36,33 @@
             border: 1px solid rgba(255,255,255,0.1);
             margin-bottom: 12px;
         }
+
+        /* Custom Scrollbar */
+        .stats-scroll-area::-webkit-scrollbar { width: 5px; }
+        .stats-scroll-area::-webkit-scrollbar-track { background: transparent; }
+        .stats-scroll-area::-webkit-scrollbar-thumb { background: #475569; border-radius: 10px; }
     </style>
 </head>
 <body>
     <div class="app-container">
-        <header style="padding-bottom: 50px;"> <i class="fas fa-chart-line" style="font-size:18px; opacity:0.8;"></i>
+        <header style="padding-bottom: 50px;"> 
+            <i class="fas fa-chart-line" style="font-size:18px; opacity:0.8;"></i>
             <h1 style="margin: 0; font-size: 24px; font-weight: 800;">Analytics</h1>
             <p style="opacity: 0.8; font-size: 13px;">Understand your spending patterns</p>
         </header>
 
-        <div class="summary-card" style="margin-top: -30px; position: relative; z-index: 10; background: #1e293b; border: 1px solid rgba(255,255,255,0.1);">
+        <div class="summary-card" style="margin-top: -30px; position: relative; z-index: 10; background: #1e293b; border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 20px; margin-left: 20px; margin-right: 20px;">
             <h3 style="margin-bottom: 20px; font-size: 16px; color: #ffffff;">Expense Distribution</h3>
-            <div style="width: 100%; max-width: 250px; margin: 0 auto;">
+            <div style="width: 100%; height: 250px; margin: 0 auto;">
                 <canvas id="expenseChart"></canvas>
             </div>
         </div>
 
         <div class="stats-scroll-area">
-<<<<<<< HEAD
-            <h3 style="font-size: 18px; color: #06070a; margin-bottom: 15px; margin-top: 20px;">Key Insights</h3>
-            <div style="display: flex; align-items: center; background: white; padding: 15px; border-radius: 15px; margin-bottom: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
-                <div style="background: #eef2ff; color: #6366f1; width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
-=======
             <h3 style="font-size: 18px; color: #ffffff; margin-bottom: 15px; margin-top: 20px;">Key Insights</h3>
             
             <div class="insight-card">
                 <div style="background: rgba(129, 140, 248, 0.1); color: #818cf8; width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
->>>>>>> 8f7e78f16771f4e27fd6775ad2f490bddd2ce5ce
                     <i class="fas fa-arrow-up"></i>
                 </div>
                 <div>
@@ -86,42 +99,53 @@
 
         let chartInstance = null;
 
+        // Listen for authentication state changes
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                // පරිශීලකයාට අදාළ වියදම් පමණක් Firestore වෙතින් ලබා ගැනීම
+                // Fetch only expenses belonging to the logged-in user
                 const q = query(collection(db, "expenses"), where("uid", "==", user.uid));
                 
-                // රියල් ටයිම් දත්ත වෙනස්වීම් හඳුනාගැනීම
+                // Real-time listener for data changes
                 onSnapshot(q, (snapshot) => {
                     const dynamicData = {};
                     snapshot.forEach(doc => {
                         const item = doc.data();
+                        // Format category name (Capitalize first letter)
                         const name = item.itemName.charAt(0).toUpperCase() + item.itemName.slice(1).toLowerCase();
+                        // Accumulate spending per category
                         dynamicData[name] = (dynamicData[name] || 0) + (parseFloat(item.price) || 0);
                     });
                     updateUI(dynamicData);
                 });
             } else { 
+                // Redirect to login if user is not authenticated
                 window.location.href = "login.html"; 
             }
         });
 
+        /**
+         * Updates the chart and insights card based on Firestore data
+         */
         function updateUI(data) {
             const labels = Object.keys(data);
             const values = Object.values(data);
             
-            // වැඩිම වියදමක් සහිත ප්‍රවර්ගය යාවත්කාලීන කිරීම
+            // Calculate highest spending category
             let highest = { name: 'None', val: 0 };
             labels.forEach(l => { 
                 if(data[l] > highest.val) { 
                     highest = { name: l, val: data[l] }; 
                 } 
             });
-            document.getElementById('highest-category').innerText = highest.val > 0 ? `${highest.name} (Rs. ${highest.val.toLocaleString()})` : "No Data";
+            
+            // Update highest spending text
+            document.getElementById('highest-category').innerText = highest.val > 0 
+                ? `${highest.name} (LKR ${highest.val.toLocaleString()})` 
+                : "No Data Available";
 
-            // Chart.js මගින් ප්‍රස්ථාරය ඇඳීම
+            // Initialize or update the Doughnut Chart
             const ctx = document.getElementById('expenseChart').getContext('2d');
-            if (chartInstance) chartInstance.destroy();
+            if (chartInstance) chartInstance.destroy(); // Destroy previous instance to avoid flickering
             
             chartInstance = new Chart(ctx, {
                 type: 'doughnut',
@@ -129,8 +153,8 @@
                     labels: labels,
                     datasets: [{
                         data: values,
-                        // අහඹු වර්ණ ලබා දීම
-                        backgroundColor: labels.map(() => `hsl(${Math.random() * 360}, 70%, 60%)`),
+                        // Generate random HSL colors for each category
+                        backgroundColor: labels.map(() => `hsl(${Math.random() * 360}, 65%, 55%)`),
                         borderWidth: 0
                     }]
                 },
@@ -138,10 +162,14 @@
                     plugins: { 
                         legend: { 
                             position: 'bottom', 
-                            labels: { color: '#94a3b8', font: { size: 11 } } 
+                            labels: { 
+                                color: '#94a3b8', 
+                                font: { size: 11, family: 'Inter' },
+                                padding: 20
+                            } 
                         } 
                     },
-                    cutout: '70%',
+                    cutout: '75%', // Thickness of the doughnut
                     responsive: true,
                     maintainAspectRatio: false
                 }
