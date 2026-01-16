@@ -1,86 +1,74 @@
-import { auth } from "./firebase-config.js";
+import { auth, db } from "./firebase-config.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { collection, addDoc, query, where, onSnapshot, orderBy, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const logoutBtn = document.getElementById('logout-btn');
 const transactionForm = document.getElementById('transaction-form');
 const list = document.getElementById('list');
 const totalAmountDisplay = document.getElementById('total-amount');
 
-const API_URL = "https://nonfeasibly-nonfavorable-dakota.ngrok-free.dev";
-
+// පරිශීලකයා ලොග් වී ඇත්දැයි පරීක්ෂා කිරීම
 onAuthStateChanged(auth, (user) => {
     if (user) {
-        const userDisplay = document.getElementById('user-display-name');
-        if (userDisplay) {
-            userDisplay.innerText = `Hi, ${user.displayName || user.email.split('@')[0]}!`;
-        }
-        loadOldExpenses(); 
+        const userName = user.displayName || user.email.split('@')[0];
+        document.getElementById('user-display-name').innerText = `Hi, ${userName}!`;
+        listenToExpenses(user.uid); // රියල් ටයිම් දත්ත ලබා ගැනීම ආරම්භ කිරීම
     } else {
         window.location.href = "login.html";
     }
 });
 
-async function loadOldExpenses() {
-    try {
-        const response = await fetch(`${API_URL}/get-expenses`, {
-            headers: { 'ngrok-skip-browser-warning': 'true' }
-        });
-        const data = await response.json(); 
-        
+// දත්ත පෙන්වීම සහ වෙනස්වීම් හඳුනාගැනීම (Real-time Listening)
+function listenToExpenses(uid) {
+    // පරිශීලකයාට අදාළ දත්ත පමණක් කාලය අනුව පෙළගස්වා ලබා ගැනීම
+    const q = query(
+        collection(db, "expenses"), 
+        where("uid", "==", uid), 
+        orderBy("timestamp", "desc")
+    );
+
+    // onSnapshot භාවිතා කිරීමෙන් දත්ත ඇතුළත් කළ සැණින් (Offline වුවත්) UI එක Update වේ
+    onSnapshot(q, (snapshot) => {
         if (!list) return;
-        list.innerHTML = ""; 
+        list.innerHTML = "";
         let total = 0;
 
-        if (data && data.length > 0) {
-            data.forEach(item => {
-                total += parseFloat(item.price);
+        if (snapshot.empty) {
+            list.innerHTML = "<p style='text-align:center; color:#94a3b8; font-size:13px;'>No transactions yet.</p>";
+        } else {
+            snapshot.forEach((docSnap) => {
+                const item = docSnap.data();
+                const id = docSnap.id;
+                total += parseFloat(item.price || 0);
+                
                 const li = document.createElement('li');
                 
-                // --- ශක්තිමත් කළ කොටස: !important වැනි බලපෑමක් ඇති කරයි ---
-                li.setAttribute('style', 'display: flex !important; justify-content: space-between !important; align-items: center !important; background: transparent !important; background-color: transparent !important; padding: 12px 0 !important; margin-bottom: 0 !important; border-bottom: 1px solid rgba(0,0,0,0.05) !important; box-shadow: none !important;');
+                // Dark Theme එකට ගැලපෙන සහ අනවශ්‍ය පසුබිම් ඉවත් කළ Style එක
+                li.setAttribute('style', 'display: flex !important; justify-content: space-between !important; align-items: center !important; background: transparent !important; padding: 12px 0 !important; border-bottom: 1px solid rgba(255,255,255,0.1) !important; margin-bottom: 0 !important; box-shadow: none !important;');
                 
                 li.innerHTML = `
                     <div style="flex: 1;">
-                        <span style="font-weight: 600; color: #1e293b; display: block; font-size: 15px;">${item.itemName}</span>
-                        <small style="color: #64748b; font-size: 12px;">LKR ${parseFloat(item.price).toLocaleString()}</small>
+                        <span style="font-weight: 600; color: #ffffff; display: block; font-size: 15px;">${item.itemName}</span>
+                        <small style="color: #94a3b8; font-size: 12px;">LKR ${parseFloat(item.price).toLocaleString()}</small>
                     </div>
-                    <button class="delete-btn" data-id="${item.id}" style="background: #fee2e2; color: #ef4444; border: none; padding: 8px 12px; border-radius: 10px; cursor: pointer;">
+                    <button class="delete-btn" onclick="deleteExpense('${id}')" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: none; padding: 8px 12px; border-radius: 10px; cursor: pointer; transition: 0.3s;">
                         <i class="fas fa-trash"></i>
                     </button>
                 `;
                 list.appendChild(li);
             });
-
-            document.querySelectorAll('.delete-btn').forEach(btn => {
-                btn.onclick = (e) => {
-                    const id = e.currentTarget.getAttribute('data-id');
-                    deleteExpense(id);
-                };
-            });
-
-        } else {
-            list.innerHTML = "<p style='text-align:center; color:#94a3b8; font-size:13px;'>No transactions yet.</p>";
         }
 
+        // මුළු මුදල යාවත්කාලීන කිරීම
         if (totalAmountDisplay) {
             totalAmountDisplay.innerText = `Rs. ${total.toLocaleString()}`;
         }
-    } catch (error) { 
-        console.error("Load Error:", error);
-    }
+    }, (error) => {
+        console.error("Firestore Listen Error:", error);
+    });
 }
 
-async function deleteExpense(id) {
-    if (!confirm("Delete this transaction?")) return;
-    try {
-        await fetch(`${API_URL}/delete-expense/${id}`, { 
-            method: 'DELETE',
-            headers: { 'ngrok-skip-browser-warning': 'true' }
-        });
-        loadOldExpenses();
-    } catch (error) { console.log("Delete Error:", error); }
-}
-
+// වියදමක් එක් කිරීම (Offline වුවද ක්ෂණිකව වැඩ කරයි)
 if (transactionForm) {
     transactionForm.onsubmit = async (e) => {
         e.preventDefault();
@@ -90,26 +78,45 @@ if (transactionForm) {
 
         if (textInput.value && amountInput.value && user) {
             try {
-                await fetch(`${API_URL}/add-expense`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
-                    body: JSON.stringify({ 
-                        text: textInput.value, 
-                        amount: amountInput.value, 
-                        uid: user.uid, 
-                        email: user.email 
-                    })
+                // Firebase Firestore වෙත දත්ත එක් කිරීම
+                await addDoc(collection(db, "expenses"), {
+                    itemName: textInput.value,
+                    price: parseFloat(amountInput.value),
+                    uid: user.uid,
+                    timestamp: new Date()
                 });
+                
+                // Input fields හිස් කිරීම
                 textInput.value = '';
                 amountInput.value = '';
-                loadOldExpenses(); 
-            } catch (error) { console.log("Add Error:", error); }
+            } catch (error) {
+                console.error("Add Error:", error);
+                alert("Error adding transaction. Please try again.");
+            }
         }
     };
 }
 
+// මකා දැමීම (Global function එකක් ලෙස)
+window.deleteExpense = async function(id) {
+    if (!confirm("Delete this transaction?")) return;
+    try {
+        await deleteDoc(doc(db, "expenses", id));
+    } catch (error) {
+        console.error("Delete Error:", error);
+        alert("Could not delete. Check your connection.");
+    }
+}
+
+// Logout කිරීම
 if (logoutBtn) {
     logoutBtn.onclick = () => {
-        signOut(auth).then(() => { window.location.href = "login.html"; });
+        if (confirm("Are you sure you want to logout?")) {
+            signOut(auth).then(() => { 
+                window.location.href = "login.html"; 
+            }).catch((error) => {
+                console.error("Logout Error:", error);
+            });
+        }
     };
 }

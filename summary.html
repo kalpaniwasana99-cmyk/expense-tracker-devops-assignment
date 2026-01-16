@@ -11,7 +11,18 @@
     <style>
         body { display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; margin: 0; padding: 20px; }
         .app-container { min-height: 750px; display: flex; flex-direction: column; position: relative; }
-        .stats-scroll-area { flex: 1; padding: 0 25px; margin-bottom: 90px; }
+        .stats-scroll-area { flex: 1; padding: 0 25px; margin-bottom: 90px; overflow-y: auto; }
+        
+        /* Dark Theme එකට ගැලපෙන Key Insights Card */
+        .insight-card {
+            display: flex; 
+            align-items: center; 
+            background: #1e293b; 
+            padding: 15px; 
+            border-radius: 15px; 
+            border: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 12px;
+        }
     </style>
 </head>
 <body>
@@ -21,22 +32,29 @@
             <p style="opacity: 0.8; font-size: 13px;">Understand your spending patterns</p>
         </header>
 
-        <div class="summary-card" style="margin-top: -30px; position: relative; z-index: 10;">
-            <h3 style="margin-bottom: 20px; font-size: 16px; color: #1e293b;">Expense Distribution</h3>
+        <div class="summary-card" style="margin-top: -30px; position: relative; z-index: 10; background: #1e293b; border: 1px solid rgba(255,255,255,0.1);">
+            <h3 style="margin-bottom: 20px; font-size: 16px; color: #ffffff;">Expense Distribution</h3>
             <div style="width: 100%; max-width: 250px; margin: 0 auto;">
                 <canvas id="expenseChart"></canvas>
             </div>
         </div>
 
         <div class="stats-scroll-area">
+<<<<<<< HEAD
             <h3 style="font-size: 18px; color: #06070a; margin-bottom: 15px; margin-top: 20px;">Key Insights</h3>
             <div style="display: flex; align-items: center; background: white; padding: 15px; border-radius: 15px; margin-bottom: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
                 <div style="background: #eef2ff; color: #6366f1; width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
+=======
+            <h3 style="font-size: 18px; color: #ffffff; margin-bottom: 15px; margin-top: 20px;">Key Insights</h3>
+            
+            <div class="insight-card">
+                <div style="background: rgba(129, 140, 248, 0.1); color: #818cf8; width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
+>>>>>>> 8f7e78f16771f4e27fd6775ad2f490bddd2ce5ce
                     <i class="fas fa-arrow-up"></i>
                 </div>
                 <div>
-                    <span style="display: block; font-size: 12px; color: #64748b;">Highest Spending</span>
-                    <strong id="highest-category" style="color: #1e293b;">Loading...</strong>
+                    <span style="display: block; font-size: 12px; color: #94a3b8;">Highest Spending</span>
+                    <strong id="highest-category" style="color: #ffffff;">Loading...</strong>
                 </div>
             </div>
         </div>
@@ -61,66 +79,74 @@
         </nav>
     </div>
 
-    <script>
-        const API_URL = "https://nonfeasibly-nonfavorable-dakota.ngrok-free.dev";
-        function getRandomColor() {
-            const letters = '0123456789ABCDEF';
-            let color = '#';
-            for (let i = 0; i < 6; i++) { color += letters[Math.floor(Math.random() * 16)]; }
-            return color;
-        }
+    <script type="module">
+        import { auth, db } from "./firebase-config.js";
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { collection, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        async function initChart() {
-            try {
-                const response = await fetch(`${API_URL}/get-expenses`, {
-                    headers: { 'ngrok-skip-browser-warning': 'true' }
-                });
-                const expenses = await response.json();
-                const dynamicCategories = {};
+        let chartInstance = null;
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // පරිශීලකයාට අදාළ වියදම් පමණක් Firestore වෙතින් ලබා ගැනීම
+                const q = query(collection(db, "expenses"), where("uid", "==", user.uid));
                 
-                expenses.forEach(exp => {
-                    const name = exp.itemName.trim();
-                    const capitalizedName = name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
-                    if (dynamicCategories[capitalizedName]) { dynamicCategories[capitalizedName] += exp.price; } 
-                    else { dynamicCategories[capitalizedName] = exp.price; }
+                // රියල් ටයිම් දත්ත වෙනස්වීම් හඳුනාගැනීම
+                onSnapshot(q, (snapshot) => {
+                    const dynamicData = {};
+                    snapshot.forEach(doc => {
+                        const item = doc.data();
+                        const name = item.itemName.charAt(0).toUpperCase() + item.itemName.slice(1).toLowerCase();
+                        dynamicData[name] = (dynamicData[name] || 0) + (parseFloat(item.price) || 0);
+                    });
+                    updateUI(dynamicData);
                 });
+            } else { 
+                window.location.href = "login.html"; 
+            }
+        });
 
-                let highestCat = 'None';
-                let maxVal = 0;
-                for (let cat in dynamicCategories) {
-                    if (dynamicCategories[cat] > maxVal) { maxVal = dynamicCategories[cat]; highestCat = cat; }
-                }
+        function updateUI(data) {
+            const labels = Object.keys(data);
+            const values = Object.values(data);
+            
+            // වැඩිම වියදමක් සහිත ප්‍රවර්ගය යාවත්කාලීන කිරීම
+            let highest = { name: 'None', val: 0 };
+            labels.forEach(l => { 
+                if(data[l] > highest.val) { 
+                    highest = { name: l, val: data[l] }; 
+                } 
+            });
+            document.getElementById('highest-category').innerText = highest.val > 0 ? `${highest.name} (Rs. ${highest.val.toLocaleString()})` : "No Data";
 
-                const labelElement = document.getElementById('highest-category');
-                if (maxVal > 0) { labelElement.innerText = `${highestCat} (Rs. ${maxVal.toLocaleString()})`; } 
-                else { labelElement.innerText = "No Expenses Yet"; }
-
-                const categoryLabels = Object.keys(dynamicCategories);
-                const categoryData = Object.values(dynamicCategories);
-                const backgroundColors = categoryLabels.map(() => getRandomColor());
-
-                const ctx = document.getElementById('expenseChart').getContext('2d');
-                new Chart(ctx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: categoryLabels,
-                        datasets: [{
-                            data: categoryData,
-                            backgroundColor: backgroundColors,
-                            borderWidth: 2,
-                            borderColor: '#ffffff'
-                        }]
+            // Chart.js මගින් ප්‍රස්ථාරය ඇඳීම
+            const ctx = document.getElementById('expenseChart').getContext('2d');
+            if (chartInstance) chartInstance.destroy();
+            
+            chartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: values,
+                        // අහඹු වර්ණ ලබා දීම
+                        backgroundColor: labels.map(() => `hsl(${Math.random() * 360}, 70%, 60%)`),
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    plugins: { 
+                        legend: { 
+                            position: 'bottom', 
+                            labels: { color: '#94a3b8', font: { size: 11 } } 
+                        } 
                     },
-                    options: {
-                        plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, padding: 15, font: { size: 11 } } } },
-                        cutout: '70%',
-                        responsive: true,
-                        maintainAspectRatio: false
-                    }
-                });
-            } catch (err) { console.error("Error loading stats:", err); }
+                    cutout: '70%',
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
         }
-        window.onload = initChart;
     </script>
 </body>
 </html>
