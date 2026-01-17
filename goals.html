@@ -88,6 +88,7 @@
         }
         .btn-delete:hover { opacity: 1; }
 
+        /* Custom Scrollbar */
         .goals-scroll-area::-webkit-scrollbar { width: 5px; }
         .goals-scroll-area::-webkit-scrollbar-track { background: transparent; }
         .goals-scroll-area::-webkit-scrollbar-thumb { background: #475569; border-radius: 10px; }
@@ -148,6 +149,7 @@
         const container = document.getElementById('goals-list-container');
         const addGoalBtn = document.getElementById('add-goal-btn');
 
+        // Check Authentication Status
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 listenToGoals(user.uid);
@@ -156,6 +158,7 @@
             }
         });
 
+        // Listen to Goals in Real-time from Firestore
         function listenToGoals(uid) {
             const q = query(collection(db, "goals"), where("uid", "==", uid));
             onSnapshot(q, (snapshot) => {
@@ -201,6 +204,7 @@
             });
         }
 
+        // Add a new goal to Firestore
         addGoalBtn.onclick = async () => {
             const nameInput = document.getElementById('goal-name');
             const targetInput = document.getElementById('target-amount');
@@ -219,12 +223,17 @@
                     targetInput.value = '';
                 } catch (error) {
                     console.error("Error adding goal:", error);
+<<<<<<< HEAD
+=======
+                    alert("Error adding goal.");
+>>>>>>> a1949f83faf112fc435a34d0bfdd1f8b48c58464
                 }
             } else {
                 alert("Please fill in all fields.");
             }
         };
 
+        // Add savings amount to an existing goal
         window.addSavings = async (id) => {
             const input = document.getElementById(`save-amount-${id}`);
             const amount = parseFloat(input.value);
@@ -236,18 +245,21 @@
                     input.value = '';
                 } catch (error) {
                     console.error("Error updating savings:", error);
+                    alert("Error updating savings.");
                 }
             } else {
                 alert("Enter a valid amount.");
             }
         };
 
+        // Delete a goal from Firestore
         window.deleteGoal = async (id) => {
             if (confirm("Are you sure you want to delete this goal?")) {
                 try {
                     await deleteDoc(doc(db, "goals", id));
                 } catch (error) {
                     console.error("Error deleting goal:", error);
+                    alert("Error deleting goal.");
                 }
             }
         };

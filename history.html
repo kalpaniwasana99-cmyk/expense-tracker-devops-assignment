@@ -10,11 +10,15 @@
     <style>
         .app-container {
             min-height: 750px; 
+<<<<<<< HEAD
 
             max-height: 750px; 
 
             max-height: 90vh; /* උස ස්ථාවර කර ස්ක්‍රෝල් වීමට ඉඩ තැබුවා */
 
+=======
+            max-height: 90vh; /* Fixed height with scroll support */
+>>>>>>> a1949f83faf112fc435a34d0bfdd1f8b48c58464
             display: flex;
             flex-direction: column;
             overflow: hidden;
@@ -26,6 +30,7 @@
             flex: 1;
             padding: 0 25px;
             margin-top: 20px;
+<<<<<<< HEAD
 
             overflow-y: auto; /* Scrollbar*/
             margin-bottom: 90px;
@@ -33,9 +38,13 @@
             overflow-y: auto;
             margin-bottom: 80px;
 
+=======
+            overflow-y: auto; /* Enable vertical scrolling */
+            margin-bottom: 80px;
+>>>>>>> a1949f83faf112fc435a34d0bfdd1f8b48c58464
         }
 
-        /* Scrollbar modification */
+        /* Custom Scrollbar Styles */
         .history-list::-webkit-scrollbar { width: 5px; }
         .history-list::-webkit-scrollbar-track { background: transparent; }
         .history-list::-webkit-scrollbar-thumb { background: #475569; border-radius: 10px; }
@@ -76,7 +85,7 @@
 
         <div class="history-list">
             <div id="history-container">
-                <p style="text-align:center; color:#94a3b8; margin-top:50px;">Loading history...</p>
+                <p style="text-align:center; color:#0e0f12; margin-top:50px;">Loading history...</p>
             </div>
         </div>
 
@@ -107,6 +116,7 @@
 
         const container = document.getElementById('history-container');
 
+        // Check user authentication status
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 listenToFullHistory(user.uid);
@@ -115,10 +125,11 @@
             }
         });
 
+        // Function to listen for real-time updates in Firestore
         function listenToFullHistory(uid) {
             const q = query(collection(db, "expenses"), where("uid", "==", uid), orderBy("timestamp", "desc"));
 
-            // Firebase Firestore රියල් ටයිම් ලිසනර් එක
+            // Firestore Real-time Listener
             onSnapshot(q, (snapshot) => {
                 container.innerHTML = snapshot.empty ? 
                     "<p style='text-align:center; color:#94a3b8; margin-top:50px;'>No history found.</p>" : 
@@ -128,7 +139,7 @@
                     const item = docSnap.data();
                     const card = document.createElement('div');
                     
-                    // Black Theme එකට ගැලපෙන Style එක
+                    // Style matching the Black Theme
                     card.setAttribute('style', 'display: flex !important; justify-content: space-between !important; align-items: center !important; background: transparent !important; padding: 15px 0 !important; border-bottom: 1px solid rgba(255,255,255,0.1) !important;');
                     
                     card.innerHTML = `
@@ -150,6 +161,7 @@
             });
         }
 
+<<<<<<< HEAD
 
         // delete Function
         window.deleteRecord = async function(id) {
@@ -166,13 +178,20 @@
                 } else {
 
         // Firebase හරහා මකා දැමීමේ Function එක
+=======
+        // Function to delete record via Firebase
+>>>>>>> a1949f83faf112fc435a34d0bfdd1f8b48c58464
         window.deleteHistoryItem = async function(id) {
             if (confirm("Delete this record permanently?")) {
                 try {
                     await deleteDoc(doc(db, "expenses", id));
                 } catch (error) {
+<<<<<<< HEAD
                     console.error("Error deleting:", error);
 
+=======
+                    console.error("Error deleting document:", error);
+>>>>>>> a1949f83faf112fc435a34d0bfdd1f8b48c58464
                     alert("Failed to delete record.");
                 }
             }
