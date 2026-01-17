@@ -1,6 +1,6 @@
 import { auth, db } from "./firebase-config.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { collection, addDoc, query, where, onSnapshot, orderBy, deleteDoc, doc, setDoc, getDoc, limit } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { collection, addDoc, query, where, onSnapshot, orderBy, deleteDoc, doc, setDoc, getDoc, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const list = document.getElementById('list');
 const totalAmountDisplay = document.getElementById('total-amount');
@@ -13,12 +13,12 @@ const logoutBtn = document.getElementById('logout-btn');
 
 let currentBudget = 0;
 
-// Authenticate user and start listening immediately
+// Listen for Auth State
 onAuthStateChanged(auth, (user) => {
     if (user) {
         document.getElementById('user-display-name').innerText = `Hi, ${user.displayName || user.email.split('@')[0]}!`;
         
-        // Start both processes simultaneously for better speed
+        // Priority loading
         loadBudget(user.uid);
         listenToExpenses(user.uid);
     } else {
@@ -26,7 +26,7 @@ onAuthStateChanged(auth, (user) => {
     }
 });
 
-// Load budget from Firestore
+// Load budget
 async function loadBudget(uid) {
     try {
         const budgetDoc = await getDoc(doc(db, "budgets", uid));
@@ -35,86 +35,87 @@ async function loadBudget(uid) {
             budgetInput.value = currentBudget;
         }
     } catch (error) {
-        console.error("Error loading budget:", error);
+        console.error("Budget load error:", error);
     }
 }
 
-// Save budget - Optimized to update UI without reload
+// Save budget
 if (saveBudgetBtn) {
     saveBudgetBtn.onclick = async () => {
         const user = auth.currentUser;
         const limitVal = parseFloat(budgetInput.value);
         if (user && !isNaN(limitVal)) {
-            try {
-                await setDoc(doc(db, "budgets", user.uid), { limit: limitVal });
-                currentBudget = limitVal;
-                alert("Monthly budget limit saved!");
-                
-                // Manually trigger a UI check instead of location.reload()
-                const currentTotal = parseFloat(totalAmountDisplay.innerText.replace(/[^\d.-]/g, '')) || 0;
-                checkBudgetLimit(currentTotal);
-            } catch (error) {
-                console.error("Save Budget Error:", error);
-            }
+            await setDoc(doc(db, "budgets", user.uid), { limit: limitVal });
+            currentBudget = limitVal;
+            alert("Monthly budget limit saved!");
+            // Refresh budget check
+            const totalText = totalAmountDisplay.innerText.replace(/[^\d.-]/g, '');
+            checkBudgetLimit(parseFloat(totalText) || 0);
         }
     };
 }
 
-// Listen to expenses (Speed optimized with limit and better clearing logic)
+// Fixed Speed Optimized Listener
 function listenToExpenses(uid) {
     const q = query(
         collection(db, "expenses"), 
         where("uid", "==", uid), 
         orderBy("timestamp", "desc"),
-        limit(10) 
+        limit(10)
     );
-    
+
+    // Using snapshot metadata to detect local vs server changes
     onSnapshot(q, (snapshot) => {
         if (!list) return;
         
-        // Clear the list every time data changes to prevent duplication or empty states
-        list.innerHTML = "";
+        list.innerHTML = ""; // Clear list immediately
 
         if (snapshot.empty) {
             list.innerHTML = "<p style='text-align:center; color:#94a3b8; font-size:13px;'>No transactions yet.</p>";
             if (totalAmountDisplay) totalAmountDisplay.innerText = "Rs. 0.00";
             checkBudgetLimit(0);
-        } else {
-            let total = 0;
-            snapshot.forEach((docSnap) => {
-                const item = docSnap.data();
-                total += parseFloat(item.price || 0);
-                
-                const li = document.createElement('li');
-                li.setAttribute('style', 'display: flex; justify-content: space-between; align-items: center; padding: 12px 10px; border-bottom: 1px solid rgba(0,0,0,0.05);');
-                li.innerHTML = `
-                    <div>
-                        <span style="font-weight: 600; color: #1e293b; display: block; font-size: 15px;">${item.itemName}</span>
-                        <small style="color: #64748b;">LKR ${parseFloat(item.price).toLocaleString()}</small>
-                    </div>
-                    <button class="delete-btn" onclick="deleteExpense('${docSnap.id}')">
-                        <i class="fas fa-trash"></i>
-                    </button>`;
-                list.appendChild(li);
-            });
-
-            if (totalAmountDisplay) {
-                totalAmountDisplay.innerText = `Rs. ${total.toLocaleString()}`;
-            }
-            checkBudgetLimit(total);
+            return;
         }
+
+        let total = 0;
+        snapshot.forEach((docSnap) => {
+            const item = docSnap.data();
+            const price = parseFloat(item.price || 0);
+            total += price;
+
+            const li = document.createElement('li');
+            li.setAttribute('style', 'display: flex; justify-content: space-between; align-items: center; padding: 12px 10px; border-bottom: 1px solid rgba(0,0,0,0.05);');
+            
+            // Format date correctly
+            const displayDate = item.timestamp ? new Date(item.timestamp.seconds * 1000).toLocaleDateString() : 'Pending...';
+
+            li.innerHTML = `
+                <div>
+                    <span style="font-weight: 600; color: #1e293b; display: block; font-size: 15px;">${item.itemName}</span>
+                    <small style="color: #64748b;">${displayDate} | LKR ${price.toLocaleString()}</small>
+                </div>
+                <button class="delete-btn" onclick="deleteExpense('${docSnap.id}')">
+                    <i class="fas fa-trash"></i>
+                </button>`;
+            list.appendChild(li);
+        });
+
+        if (totalAmountDisplay) {
+            totalAmountDisplay.innerText = `Rs. ${total.toLocaleString()}`;
+        }
+        checkBudgetLimit(total);
     }, (error) => {
-        console.error("Firestore Listen Error:", error);
+        console.error("Firestore Listener Error:", error);
     });
 }
 
-// Budget limit alerts with visual updates
+// Budget check logic
 function checkBudgetLimit(total) {
     if (!budgetCard || !budgetStatus) return;
-    const budgetValue = parseFloat(currentBudget) || 0;
-    const totalValue = parseFloat(total) || 0;
+    const budgetVal = parseFloat(currentBudget) || 0;
+    const totalVal = parseFloat(total) || 0;
 
-    if (budgetValue > 0 && totalValue > budgetValue) {
+    if (budgetVal > 0 && totalVal > budgetVal) {
         budgetCard.classList.add('budget-over');
         totalAmountDisplay.classList.add('text-danger');
         budgetStatus.innerHTML = `
@@ -122,53 +123,39 @@ function checkBudgetLimit(total) {
                 <span style="color: #ef4444; font-size: 12px; font-weight: 800;">
                     <i class="fas fa-exclamation-triangle"></i> ALERT: Monthly Budget Exceeded!
                 </span>
-            </div>
-        `;
+            </div>`;
     } else {
         budgetCard.classList.remove('budget-over');
         totalAmountDisplay.classList.remove('text-danger');
-        if (budgetValue > 0) {
-            budgetStatus.innerHTML = `<div style="margin-top: 10px;"><span style="color: #10b981; font-size: 11px; font-weight: 600;"><i class="fas fa-check-circle"></i> Spending is within safe limit.</span></div>`;
-        } else {
-            budgetStatus.innerText = "";
-        }
+        budgetStatus.innerHTML = budgetVal > 0 ? 
+            `<div style="margin-top: 10px;"><span style="color: #10b981; font-size: 11px; font-weight: 600;"><i class="fas fa-check-circle"></i> Within safe limit</span></div>` : "";
     }
 }
 
-// Add transaction
+// Add transaction with ServerTimestamp
 if (transactionForm) {
     transactionForm.onsubmit = async (e) => {
         e.preventDefault();
         const textInput = document.getElementById('text');
         const amountInput = document.getElementById('amount');
-        const user = auth.currentUser;
-
-        if (textInput.value && amountInput.value && user) {
+        if (textInput.value && amountInput.value && auth.currentUser) {
             try {
                 await addDoc(collection(db, "expenses"), {
                     itemName: textInput.value,
                     price: parseFloat(amountInput.value),
-                    uid: user.uid,
-                    timestamp: new Date()
+                    uid: auth.currentUser.uid,
+                    timestamp: serverTimestamp() // Use server time for accurate ordering
                 });
                 textInput.value = '';
                 amountInput.value = '';
-            } catch (error) {
-                console.error("Add Error:", error);
-            }
+            } catch (error) { console.error("Add error:", error); }
         }
     };
 }
 
-// Global delete
+// Global Delete
 window.deleteExpense = async (id) => {
-    if (confirm("Delete this transaction?")) {
-        try {
-            await deleteDoc(doc(db, "expenses", id));
-        } catch (error) {
-            console.error("Delete Error:", error);
-        }
-    }
+    if (confirm("Delete this?")) await deleteDoc(doc(db, "expenses", id));
 };
 
 // Logout
