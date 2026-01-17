@@ -1,6 +1,6 @@
 import { auth, db } from "./firebase-config.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { collection, query, where, onSnapshot, orderBy, deleteDoc, doc, setDoc, getDoc, limit } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { collection, addDoc, query, where, onSnapshot, orderBy, deleteDoc, doc, setDoc, getDoc, limit } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const list = document.getElementById('list');
 const totalAmountDisplay = document.getElementById('total-amount');
@@ -13,6 +13,7 @@ const logoutBtn = document.getElementById('logout-btn');
 
 let currentBudget = 0;
 
+// Authenticate user
 onAuthStateChanged(auth, (user) => {
     if (user) {
         document.getElementById('user-display-name').innerText = `Hi, ${user.displayName || user.email.split('@')[0]}!`;
@@ -23,6 +24,7 @@ onAuthStateChanged(auth, (user) => {
     }
 });
 
+// Load budget
 async function loadBudget(uid) {
     const budgetDoc = await getDoc(doc(db, "budgets", uid));
     if (budgetDoc.exists()) {
@@ -31,21 +33,21 @@ async function loadBudget(uid) {
     }
 }
 
+// Save budget
 if (saveBudgetBtn) {
     saveBudgetBtn.onclick = async () => {
         const user = auth.currentUser;
-        const limit = parseFloat(budgetInput.value);
-        if (user && !isNaN(limit)) {
-            await setDoc(doc(db, "budgets", user.uid), { limit: limit });
-            currentBudget = limit;
+        const limitVal = parseFloat(budgetInput.value);
+        if (user && !isNaN(limitVal)) {
+            await setDoc(doc(db, "budgets", user.uid), { limit: limitVal });
+            currentBudget = limitVal;
             alert("Monthly budget limit saved!");
-             
         }
     };
 }
 
+// Listen to expenses (Speed optimized with limit)
 function listenToExpenses(uid) {
-    // Adding limit(10) to fetch only the 10 most recent transactions
     const q = query(
         collection(db, "expenses"), 
         where("uid", "==", uid), 
@@ -62,7 +64,18 @@ function listenToExpenses(uid) {
             const item = docSnap.data();
             total += parseFloat(item.price || 0);
             
-            // ... (your existing list item creation code)
+            // Create list item (THIS WAS MISSING IN YOUR CODE)
+            const li = document.createElement('li');
+            li.setAttribute('style', 'display: flex; justify-content: space-between; align-items: center; padding: 12px 10px; border-bottom: 1px solid rgba(0,0,0,0.05);');
+            li.innerHTML = `
+                <div>
+                    <span style="font-weight: 600; color: #1e293b; display: block;">${item.itemName}</span>
+                    <small style="color: #64748b;">LKR ${parseFloat(item.price).toLocaleString()}</small>
+                </div>
+                <button class="delete-btn" onclick="deleteExpense('${docSnap.id}')">
+                    <i class="fas fa-trash"></i>
+                </button>`;
+            list.appendChild(li);
         });
 
         if (totalAmountDisplay) {
@@ -72,20 +85,15 @@ function listenToExpenses(uid) {
     });
 }
 
-// Logic to show notifications based on budget limit
+// Budget limit alerts
 function checkBudgetLimit(total) {
     if (!budgetCard || !budgetStatus) return;
-
-    // Ensure we are comparing numbers
     const budgetValue = parseFloat(currentBudget) || 0;
     const totalValue = parseFloat(total) || 0;
 
     if (budgetValue > 0 && totalValue > budgetValue) {
-        // 1. Add visual red styles
         budgetCard.classList.add('budget-over');
         totalAmountDisplay.classList.add('text-danger');
-        
-        // 2. Display the Alert Message
         budgetStatus.innerHTML = `
             <div style="background: rgba(239, 68, 68, 0.1); padding: 8px; border-radius: 8px; border-left: 4px solid #ef4444; margin-top: 10px;">
                 <span style="color: #ef4444; font-size: 12px; font-weight: 800;">
@@ -94,24 +102,17 @@ function checkBudgetLimit(total) {
             </div>
         `;
     } else {
-        // Reset to normal state
         budgetCard.classList.remove('budget-over');
         totalAmountDisplay.classList.remove('text-danger');
-        
         if (budgetValue > 0) {
-            budgetStatus.innerHTML = `
-                <div style="margin-top: 10px;">
-                    <span style="color: #10b981; font-size: 11px; font-weight: 600;">
-                        <i class="fas fa-check-circle"></i> Spending is within safe limit.
-                    </span>
-                </div>
-            `;
+            budgetStatus.innerHTML = `<div style="margin-top: 10px;"><span style="color: #10b981; font-size: 11px; font-weight: 600;"><i class="fas fa-check-circle"></i> Spending is within safe limit.</span></div>`;
         } else {
             budgetStatus.innerText = "";
         }
     }
 }
 
+// Add transaction
 if (transactionForm) {
     transactionForm.onsubmit = async (e) => {
         e.preventDefault();
@@ -136,12 +137,14 @@ if (transactionForm) {
     };
 }
 
+// Global delete
 window.deleteExpense = async (id) => {
     if (confirm("Delete this transaction?")) {
         await deleteDoc(doc(db, "expenses", id));
     }
 };
 
+// Logout
 if (logoutBtn) {
     logoutBtn.onclick = async () => {
         if (confirm("Logout?")) {
