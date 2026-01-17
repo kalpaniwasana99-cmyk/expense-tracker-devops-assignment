@@ -1,53 +1,44 @@
 import { auth } from "./firebase-config.js";
 import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+ 
+const loginBtn = document.getElementById('login-btn');
+const loginEmail = document.getElementById('login-email');
+const loginPassword = document.getElementById('login-password');
 
-const loginForm = document.getElementById('login-form');
+if (loginBtn) {
+    loginBtn.addEventListener('click', async (e) => {
+        e.preventDefault(); // stop Refresh page again
 
-if (loginForm) {
-    loginForm.addEventListener('submit', async (e) => {
-        e.preventDefault(); 
+        const email = loginEmail.value.trim();
+        const password = loginPassword.value.trim();
 
-        const email = document.getElementById('email').value;
-        const password = document.getElementById('password').value;
-
-        console.log("Connecting to Firebase...");
+        if (!email || !password) {
+            alert("please enter email and password..!");
+            return;
+        }
 
         try {
+            loginBtn.disabled = true;
+            loginBtn.innerText = "Logging in...";
+
             // 1. Firebase Login
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
-            const user = userCredential.user;
-            console.log("Firebase Login Success!");
+            console.log("Login Success:", userCredential.user.email);
 
-            // 2. Node.js Backend Notification (ngrok URL එක මෙතනට දමා ඇත)
-            try {
-                // මෙතන තමයි ඔයා දුන්නු අලුත් ලින්ක් එක තියෙන්නේ
-                const response = await fetch('https://nonfeasibly-nonfavorable-dakota.ngrok-free.dev/login-notify', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        uid: user.uid,
-                        email: user.email,
-                        loginTime: new Date().toISOString()
-                    }),
-                });
-
-                const data = await response.json();
-                console.log('Success: Message from Node.js Backend:', data);
-
-            } catch (backendError) {
-                console.error("Backend Error: Cannot connect to Node.js server.", backendError);
-            }
-
-            alert("Login Successful! Check your Backend Terminal.");
-            
-            // පරීක්ෂාව සාර්ථක වූ පසු මෙය ඉවත් කර Dashboard එකට යා හැක
-             window.location.href = "index.html";
+            // 2. go to Dashboard 
+            window.location.href = "index.html"; 
 
         } catch (error) {
-            console.error("Firebase Login Error:", error);
-            alert("Login Failed: " + error.code);
+            loginBtn.disabled = false;
+            loginBtn.innerText = "Login Now";
+            console.error("Login Error:", error.code);
+            
+            // error handling
+            if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password') {
+                alert("Incorrect email or password.");
+            } else {
+                alert("have a error: " + error.message);
+            }
         }
     });
 }

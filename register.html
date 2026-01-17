@@ -2,82 +2,52 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Register - Expense Tracker</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
+    <style>
+        .app-container {
+            min-height: 700px;
+            justify-content: center;
+            padding-bottom: 40px;
+        }
+    </style>
 </head>
 <body>
-    <div class="container auth-container">
-        <header>
-            <h2>Create Account</h2>
-            <p>Start tracking your expenses today</p>
+
+    <div class="app-container">
+        <header style="padding: 40px 20px; border-radius: 0 0 40px 40px;">
+            <i class="fas fa-user-plus" style="font-size: 40px; margin-bottom: 15px;"></i>
+            <h1 style="margin: 0; font-size: 26px; font-weight: 800;">Join Us</h1>
+            <p style="opacity: 0.8; font-size: 14px;">Start your financial journey today</p>
         </header>
 
-        <form id="register-form">
+        <div class="input-group" style="margin-top: 20px;">
             <div class="form-control">
-                <label for="username">Username</label>
-                <input type="text" id="username" placeholder="Pick a username" required>
+                <label style="font-size: 13px; font-weight: 600; color: #475569;">Full Name</label>
+                <input type="text" id="reg-name" placeholder="John Doe" required>
             </div>
-            <div class="form-control">
-                <label for="email">Email</label>
-                <input type="email" id="email" placeholder="Enter your email" required>
+            <div class="form-control" style="margin-top: 15px;">
+                <label style="font-size: 13px; font-weight: 600; color: #475569;">Email Address</label>
+                <input type="email" id="reg-email" placeholder="name@example.com" required>
             </div>
-            <div class="form-control">
-                <label for="password">Password</label>
-                <input type="password" id="password" placeholder="Create a password" required>
+            <div class="form-control" style="margin-top: 15px;">
+                <label style="font-size: 13px; font-weight: 600; color: #475569;">Password</label>
+                <input type="password" id="reg-password" placeholder="Min 6 characters" required>
             </div>
-            <button type="submit" class="btn">Register</button>
-        </form>
-
-        <p class="auth-link">Already have an account? <a href="login.html">Login here</a></p>
+            <button id="register-btn" class="btn-add" style="margin-top: 25px;">
+                <i class="fas fa-rocket"></i> Register Now
+            </button>
+            
+            <p style="text-align: center; margin-top: 20px; font-size: 14px; color: #64748b;">
+                Already have an account? <br>
+                <a href="login.html" style="color: #6366f1; font-weight: 600; text-decoration: none;">Login here</a>
+            </p>
+        </div>
     </div>
 
-    <script type="module">
-        // Firebase Functions Import 
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-
-     
-        // (Firebase Console > Project Settings > General > Your apps > SDK setup/configuration)
-       const firebaseConfig = {
-  apiKey: "AIzaSyDABz3M9xMIBtXtALKC-N31nExCG_PDL3k",
-  authDomain: "expense-tracker-team-c6942.firebaseapp.com",
-  projectId: "expense-tracker-team-c6942",
-  storageBucket: "expense-tracker-team-c6942.firebasestorage.app",
-  messagingSenderId: "873596876456",
-  appId: "1:873596876456:web:3bafe0dd791165a111749d"
-};
-
-        // Firebase Initialize
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-
-      
-        const registerForm = document.getElementById('register-form');
-
-        registerForm.addEventListener('submit', (e) => {
-            e.preventDefault(); // stop page Reload 
-
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-
-            // Firebase Data 
-            createUserWithEmailAndPassword(auth, email, password)
-                .then((userCredential) => {
-                    // if successfully
-                    alert("Registration Successful! Redirecting to Login...");
-                    
-                    
-                    window.location.href = "login.html"; 
-                })
-                .catch((error) => {
-                   
-                    const errorCode = error.code;
-                    const errorMessage = error.message;
-                    alert("Registration Failed: " + errorMessage);
-                });
-        });
-    </script>
+    <script type="module" src="register.js"></script>
 </body>
 </html>
