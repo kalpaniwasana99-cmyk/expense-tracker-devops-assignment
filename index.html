@@ -14,30 +14,26 @@
         .summary-card { margin-top: 0px; padding: 20px; border-radius: 20px; flex-shrink: 0; transition: all 0.3s ease; }
         .input-group { padding: 15px 25px; flex-shrink: 0; }
         .scroll-area { flex: 1; padding: 0 25px; margin-bottom: 90px; overflow-y: auto; }
-        #list { list-style: none; padding: 0; margin: 0; background: transparent !important; }
-        #list li { border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important; display: flex; justify-content: space-between; align-items: center; padding: 12px 10px; color: #1e293b; }
-        .delete-btn { background-color: #0c0b0b; color: #ef4444; border: none; padding: 5px 8px; border-radius: 5px; cursor: pointer; font-size: 12px; }
+        
+        /* List styling for transactions */
+        #list { list-style: none; padding: 0; margin: 0; }
         
         /* Budget Warning Styles */
         .budget-over { background: #fee2e2 !important; border: 2px solid #ef4444 !important; }
         .text-danger { color: #ef4444 !important; }
-        
-        .scroll-area::-webkit-scrollbar { width: 5px; }
-        .scroll-area::-webkit-scrollbar-track { background: transparent; }
-        .scroll-area::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
     </style>
 </head>
 <body>
     <div class="app-container">
         <header>
             <div class="user-info" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                <span id="user-display-name" style="font-weight: 600; font-size: 14px; opacity: 0.9;">Welcome Back!</span>
+                <span id="user-display-name" style="font-weight: 600; font-size: 14px; opacity: 0.9;">Welcome!</span>
                 <button id="logout-btn" style="background: rgba(255,255,255,0.2); color: white; border: none; padding: 6px 12px; border-radius: 20px; cursor: pointer; font-size: 11px;">
                     Logout <i class="fas fa-right-from-bracket" style="font-size:14px; opacity:0.8;"></i>
                 </button> 
             </div>
             <h1 style="margin: 0; font-size: 24px; font-weight: 800;">Expense Tracker</h1>
-            <p style="opacity: 0.8; font-size: 13px;">Smartly manage your daily spending</p>
+            <p style="opacity: 0.8; font-size: 13px;">Manage your daily spending</p>
         </header>
 
         <div class="summary-card" id="budget-card">
@@ -57,51 +53,30 @@
                     <input type="number" id="monthly-budget" placeholder="Enter Limit" style="flex: 1; padding: 8px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 12px;">
                     <button id="save-budget-btn" style="background: #1e293b; color: white; border: none; padding: 8px 12px; border-radius: 10px; font-size: 11px; cursor: pointer;">Save</button>
                 </div>
-                <p id="budget-status" style="font-size: 11px; margin-top: 8px; font-weight: 700; min-height: 15px;"></p>
+                <p id="budget-status" style="font-size: 11px; margin-top: 8px; font-weight: 700;"></p>
             </div>
         </div>
 
         <div class="input-group">
             <form id="transaction-form">
-                <div class="form-control">
-                    <label style="display: block; margin-bottom: 5px; font-size: 12px; font-weight: 600; color: #475569;">Expense Name</label>
-                    <input type="text" id="text" placeholder="e.g. Coffee" required style="width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #e2e8f0;">
-                </div>
-                <div class="form-control" style="margin-top: 10px;">
-                    <label style="display: block; margin-bottom: 5px; font-size: 12px; font-weight: 600; color: #07080a;">Amount (LKR)</label>
-                    <input type="number" id="amount" placeholder="e.g. 1250" required style="width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #e2e8f0;">
-                </div>
-                <button type="submit" class="btn-add" style="margin-top: 15px; width: 100%;">
-                    <i class="fas fa-plus-circle"></i> Add Transaction
-                </button>
+                <input type="text" id="text" placeholder="Item Name" required style="width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #e2e8f0; margin-bottom: 10px;">
+                <input type="number" id="amount" placeholder="Amount (LKR)" required style="width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #e2e8f0; margin-bottom: 10px;">
+                <button type="submit" class="btn-add" style="width: 100%;"><i class="fas fa-plus-circle"></i> Add Transaction</button>
             </form>
         </div>
 
         <div class="scroll-area">
             <h3 style="margin: 15px 0 10px 0; font-size: 17px; color: #010a1d;">Recent Transactions</h3>
-            <ul id="list" class="list"></ul>
+            <ul id="list"></ul>
         </div>
 
         <nav class="bottom-nav">
-            <a href="index.html" class="nav-item active">
-                <i class="fas fa-home icon-home"></i>
-                <span>Home</span>
-            </a>
-            <a href="summary.html" class="nav-item">
-                <i class="fas fa-chart-pie icon-stats"></i>
-                <span>Stats</span>
-            </a>
-            <a href="goals.html" class="nav-item">
-                <i class="fas fa-bullseye icon-goals"></i>
-                <span>Goals</span>
-            </a>
-            <a href="profile.html" class="nav-item">
-                <i class="fas fa-user-circle icon-profile"></i>
-                <span>Profile</span>
-            </a>
+            <a href="index.html" class="nav-item active"><i class="fas fa-home"></i> <span>Home</span></a>
+            <a href="summary.html" class="nav-item"><i class="fas fa-chart-pie"></i> <span>Stats</span></a>
+            <a href="goals.html" class="nav-item"><i class="fas fa-bullseye"></i> <span>Goals</span></a>
+            <a href="profile.html" class="nav-item"><i class="fas fa-user-circle"></i> <span>Profile</span></a>
         </nav>
     </div>
-
     <script type="module" src="script.js"></script>
 </body>
 </html>
