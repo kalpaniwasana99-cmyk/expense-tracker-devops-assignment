@@ -78,13 +78,18 @@ function listenToExpenses(uid) {
 
 // Logic to show notifications based on budget limit
 function checkBudgetLimit(total) {
-    const budgetValue = parseFloat(currentBudget);
-    const totalValue = parseFloat(total);
+    if (!budgetCard || !budgetStatus) return;
+
+    // Ensure we are comparing numbers
+    const budgetValue = parseFloat(currentBudget) || 0;
+    const totalValue = parseFloat(total) || 0;
 
     if (budgetValue > 0 && totalValue > budgetValue) {
-        // Red alert state
+        // 1. Add visual red styles
         budgetCard.classList.add('budget-over');
         totalAmountDisplay.classList.add('text-danger');
+        
+        // 2. Display the Alert Message
         budgetStatus.innerHTML = `
             <div style="background: rgba(239, 68, 68, 0.1); padding: 8px; border-radius: 8px; border-left: 4px solid #ef4444; margin-top: 10px;">
                 <span style="color: #ef4444; font-size: 12px; font-weight: 800;">
@@ -93,14 +98,15 @@ function checkBudgetLimit(total) {
             </div>
         `;
     } else {
-        // Safe state
+        // Reset to normal state
         budgetCard.classList.remove('budget-over');
         totalAmountDisplay.classList.remove('text-danger');
+        
         if (budgetValue > 0) {
             budgetStatus.innerHTML = `
                 <div style="margin-top: 10px;">
                     <span style="color: #10b981; font-size: 11px; font-weight: 600;">
-                        <i class="fas fa-check-circle"></i> Spending is within your safe limit.
+                        <i class="fas fa-check-circle"></i> Spending is within safe limit.
                     </span>
                 </div>
             `;
