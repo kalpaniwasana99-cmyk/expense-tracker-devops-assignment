@@ -1,33 +1,68 @@
 import { auth, db } from "./firebase-config.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { collection, addDoc, query, where, onSnapshot, orderBy, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { collection, addDoc, query, where, onSnapshot, orderBy, deleteDoc, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const logoutBtn = document.getElementById('logout-btn');
 const transactionForm = document.getElementById('transaction-form');
 const list = document.getElementById('list');
 const totalAmountDisplay = document.getElementById('total-amount');
+const budgetInput = document.getElementById('monthly-budget');
+const saveBudgetBtn = document.getElementById('save-budget-btn');
+const budgetCard = document.getElementById('budget-card');
+const budgetStatus = document.getElementById('budget-status');
 
-// පරිශීලකයා ලොග් වී ඇත්දැයි පරීක්ෂා කිරීම
+let currentBudget = 0;
+
+// Check user authentication status
 onAuthStateChanged(auth, (user) => {
     if (user) {
         const userName = user.displayName || user.email.split('@')[0];
         document.getElementById('user-display-name').innerText = `Hi, ${userName}!`;
-        listenToExpenses(user.uid); // රියල් ටයිම් දත්ත ලබා ගැනීම ආරම්භ කිරීම
+        
+        // Load the saved budget and then start listening to expenses
+        loadBudget(user.uid);
+        listenToExpenses(user.uid);
     } else {
         window.location.href = "login.html";
     }
 });
 
-// දත්ත පෙන්වීම සහ වෙනස්වීම් හඳුනාගැනීම (Real-time Listening)
+// Load the monthly budget limit from Firestore
+async function loadBudget(uid) {
+    const budgetDoc = await getDoc(doc(db, "budgets", uid));
+    if (budgetDoc.exists()) {
+        currentBudget = budgetDoc.data().limit;
+        budgetInput.value = currentBudget;
+    }
+}
+
+// Save the monthly budget limit to Firestore
+if (saveBudgetBtn) {
+    saveBudgetBtn.onclick = async () => {
+        const user = auth.currentUser;
+        const limit = parseFloat(budgetInput.value);
+        if (user && !isNaN(limit)) {
+            try {
+                await setDoc(doc(db, "budgets", user.uid), { limit: limit });
+                currentBudget = limit;
+                alert("Budget limit saved successfully!");
+                // Re-trigger UI update if listener is active
+                location.reload(); 
+            } catch (error) {
+                console.error("Budget Save Error:", error);
+            }
+        }
+    };
+}
+
+// Listen for real-time updates of expenses
 function listenToExpenses(uid) {
-    // පරිශීලකයාට අදාළ දත්ත පමණක් කාලය අනුව පෙළගස්වා ලබා ගැනීම
     const q = query(
         collection(db, "expenses"), 
         where("uid", "==", uid), 
         orderBy("timestamp", "desc")
     );
 
-    // onSnapshot භාවිතා කිරීමෙන් දත්ත ඇතුළත් කළ සැණින් (Offline වුවත්) UI එක Update වේ
     onSnapshot(q, (snapshot) => {
         if (!list) return;
         list.innerHTML = "";
@@ -42,16 +77,14 @@ function listenToExpenses(uid) {
                 total += parseFloat(item.price || 0);
                 
                 const li = document.createElement('li');
-                
-                // Dark Theme එකට ගැලපෙන සහ අනවශ්‍ය පසුබිම් ඉවත් කළ Style එක
-                li.setAttribute('style', 'display: flex !important; justify-content: space-between !important; align-items: center !important; background: transparent !important; padding: 12px 0 !important; border-bottom: 1px solid rgba(255,255,255,0.1) !important; margin-bottom: 0 !important; box-shadow: none !important;');
+                li.setAttribute('style', 'display: flex !important; justify-content: space-between !important; align-items: center !important; background: transparent !important; padding: 12px 0 !important; border-bottom: 1px solid rgba(0,0,0,0.05) !important; margin-bottom: 0 !important; box-shadow: none !important;');
                 
                 li.innerHTML = `
                     <div style="flex: 1;">
-                        <span style="font-weight: 600; color: #ffffff; display: block; font-size: 15px;">${item.itemName}</span>
-                        <small style="color: #94a3b8; font-size: 12px;">LKR ${parseFloat(item.price).toLocaleString()}</small>
+                        <span style="font-weight: 600; color: #1e293b; display: block; font-size: 15px;">${item.itemName}</span>
+                        <small style="color: #64748b; font-size: 12px;">LKR ${parseFloat(item.price).toLocaleString()}</small>
                     </div>
-                    <button class="delete-btn" onclick="deleteExpense('${id}')" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: none; padding: 8px 12px; border-radius: 10px; cursor: pointer; transition: 0.3s;">
+                    <button class="delete-btn" onclick="deleteExpense('${id}')">
                         <i class="fas fa-trash"></i>
                     </button>
                 `;
@@ -59,16 +92,37 @@ function listenToExpenses(uid) {
             });
         }
 
-        // මුළු මුදල යාවත්කාලීන කිරීම
+        // Update Total Amount UI
         if (totalAmountDisplay) {
             totalAmountDisplay.innerText = `Rs. ${total.toLocaleString()}`;
         }
+
+        // Check against the monthly budget limit
+        checkBudgetLimit(total);
+
     }, (error) => {
         console.error("Firestore Listen Error:", error);
     });
 }
 
-// වියදමක් එක් කිරීම (Offline වුවද ක්ෂණිකව වැඩ කරයි)
+// Monitor spending against the budget and update UI colors
+function checkBudgetLimit(total) {
+    if (currentBudget > 0 && total > currentBudget) {
+        // Warning: Budget Exceeded
+        budgetCard.classList.add('budget-over');
+        totalAmountDisplay.classList.add('text-danger');
+        budgetStatus.innerText = "⚠️ Budget Exceeded!";
+        budgetStatus.style.color = "#ef4444";
+    } else {
+        // Budget OK
+        budgetCard.classList.remove('budget-over');
+        totalAmountDisplay.classList.remove('text-danger');
+        budgetStatus.innerText = currentBudget > 0 ? "Budget is within safe limits." : "";
+        budgetStatus.style.color = "#10b981";
+    }
+}
+
+// Add a new expense record to Firestore
 if (transactionForm) {
     transactionForm.onsubmit = async (e) => {
         e.preventDefault();
@@ -78,45 +132,39 @@ if (transactionForm) {
 
         if (textInput.value && amountInput.value && user) {
             try {
-                // Firebase Firestore වෙත දත්ත එක් කිරීම
                 await addDoc(collection(db, "expenses"), {
                     itemName: textInput.value,
                     price: parseFloat(amountInput.value),
                     uid: user.uid,
                     timestamp: new Date()
                 });
-                
-                // Input fields හිස් කිරීම
                 textInput.value = '';
                 amountInput.value = '';
             } catch (error) {
                 console.error("Add Error:", error);
-                alert("Error adding transaction. Please try again.");
+                alert("Error adding transaction.");
             }
         }
     };
 }
 
-// මකා දැමීම (Global function එකක් ලෙස)
+// Delete an expense record
 window.deleteExpense = async function(id) {
     if (!confirm("Delete this transaction?")) return;
     try {
         await deleteDoc(doc(db, "expenses", id));
     } catch (error) {
         console.error("Delete Error:", error);
-        alert("Could not delete. Check your connection.");
     }
 }
 
-// Logout කිරීම
+// Logout functionality
 if (logoutBtn) {
     logoutBtn.onclick = () => {
         if (confirm("Are you sure you want to logout?")) {
             signOut(auth).then(() => { 
                 window.location.href = "login.html"; 
-            }).catch((error) => {
-                console.error("Logout Error:", error);
-            });
+            }).catch((error) => console.error("Logout Error:", error));
         }
     };
 }
