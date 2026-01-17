@@ -7,6 +7,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
     <style>
         .app-container {
             min-height: 750px; 
@@ -50,6 +54,26 @@
             opacity: 0.6;
         }
         .delete-btn:hover { opacity: 1; transform: scale(1.1); }
+
+        /* Styles for the Download Button */
+        .btn-download-pdf {
+            width: 100%;
+            padding: 12px;
+            margin-top: 15px;
+            background: #10b981;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: 0.3s;
+        }
+        .btn-download-pdf:hover { background: #059669; }
     </style>
 </head>
 <body>
@@ -63,6 +87,10 @@
             </div>
             <h1 style="margin: 0; font-size: 28px; font-weight: 800;">Expense History</h1>
             <p style="opacity: 0.8; font-size: 14px;">Review all your past transactions</p>
+            
+            <button id="download-pdf" class="btn-download-pdf">
+                <i class="fas fa-file-pdf"></i> Download PDF Report
+            </button>
         </header>
 
         <div class="history-list">
@@ -111,7 +139,6 @@
         function listenToFullHistory(uid) {
             const q = query(collection(db, "expenses"), where("uid", "==", uid), orderBy("timestamp", "desc"));
 
-            // Firestore Real-time Listener
             onSnapshot(q, (snapshot) => {
                 container.innerHTML = snapshot.empty ? 
                     "<p style='text-align:center; color:#94a3b8; margin-top:50px;'>No history found.</p>" : 
@@ -121,7 +148,6 @@
                     const item = docSnap.data();
                     const card = document.createElement('div');
                     
-                    // Style matching the Black Theme
                     card.setAttribute('style', 'display: flex !important; justify-content: space-between !important; align-items: center !important; background: transparent !important; padding: 15px 0 !important; border-bottom: 1px solid rgba(255,255,255,0.1) !important;');
                     
                     card.innerHTML = `
@@ -142,6 +168,50 @@
                 });
             });
         }
+
+        // --- PDF Generation Logic ---
+        document.getElementById('download-pdf').addEventListener('click', () => {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            // PDF Title and Formatting
+            doc.setFontSize(20);
+            doc.setTextColor(30, 41, 59); // Dark blue color
+            doc.text("Expense Tracker Report", 14, 22);
+            
+            doc.setFontSize(10);
+            doc.setTextColor(100);
+            doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 30);
+
+            // Extract data from history container
+            const tableRows = [];
+            const historyItems = container.querySelectorAll('div[style*="display: flex"]');
+
+            historyItems.forEach(item => {
+                const name = item.querySelector('span').innerText;
+                const date = item.querySelector('small').innerText.trim();
+                const price = item.querySelector('span[style*="color: #818cf8"]').innerText;
+                tableRows.push([date, name, price]);
+            });
+
+            if (tableRows.length === 0) {
+                alert("No expense records found to export.");
+                return;
+            }
+
+            // Generate Table
+            doc.autoTable({
+                head: [['Date', 'Description', 'Amount']],
+                body: tableRows,
+                startY: 40,
+                theme: 'grid',
+                headStyles: { fillColor: [99, 102, 241], textColor: [255, 255, 255] }, // Matches your primary blue
+                styles: { fontSize: 10, cellPadding: 5 }
+            });
+
+            // Save PDF
+            doc.save(`Expense_Report_${new Date().toISOString().slice(0,10)}.pdf`);
+        });
 
         // Function to delete record permanently via Firebase
         window.deleteHistoryItem = async function(id) {
