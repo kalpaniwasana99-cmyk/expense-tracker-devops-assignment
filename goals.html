@@ -114,15 +114,10 @@
         </div>
 
         <div class="goals-scroll-area">
-<<<<<<< HEAD
-            <h3 style="margin: 20px 0 15px 0; font-size: 18px; color: #03070f;">Goal Progress</h3>
-            <div id="goals-list-container"></div>
-=======
             <h3 style="margin: 20px 0 15px 0; font-size: 18px; color: #ffffff;">Goal Progress</h3>
             <div id="goals-list-container">
                 <p style="text-align:center; color:#94a3b8; margin-top:30px; font-size: 13px;">Loading your goals...</p>
             </div>
->>>>>>> 8f7e78f16771f4e27fd6775ad2f490bddd2ce5ce
         </div>
 
         <nav class="bottom-nav">
@@ -211,38 +206,6 @@
             const targetInput = document.getElementById('target-amount');
             const user = auth.currentUser;
 
-<<<<<<< HEAD
-            try {
-                await fetch(`${API_URL}/add-goal`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ goalName: name, targetAmount: parseFloat(target), currentSaved: 0 })
-                });
-                document.getElementById('goal-name').value = '';
-                document.getElementById('target-amount').value = '';
-                loadGoals();
-            } catch (err) { console.error("Error adding goal:", err); }
-        }
-
-        async function addSavings(goalId) {
-            const amountInput = document.getElementById(`save-amount-${goalId}`);
-            const amount = parseFloat(amountInput.value);
-
-            if (!amount || amount <= 0) return alert("Enter a valid amount");
-
-            try {
-                const response = await fetch(`${API_URL}/update-goal/${goalId}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ amountToAdd: amount })
-                });
-
-                if (response.ok) {
-                    amountInput.value = '';
-                    loadGoals(); // refresh and show new values
-                } else {
-                    alert("Failed to update savings.");
-=======
             if (nameInput.value && targetInput.value && user) {
                 try {
                     await addDoc(collection(db, "goals"), {
@@ -256,7 +219,6 @@
                     targetInput.value = '';
                 } catch (error) {
                     console.error("Error adding goal:", error);
->>>>>>> 8f7e78f16771f4e27fd6775ad2f490bddd2ce5ce
                 }
             } else {
                 alert("Please fill in all fields.");
