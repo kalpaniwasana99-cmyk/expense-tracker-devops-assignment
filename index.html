@@ -16,9 +16,8 @@
         .scroll-area { flex: 1; padding: 0 25px; margin-bottom: 90px; overflow-y: auto; }
         #list { list-style: none; padding: 0; margin: 0; }
         
-        /* Styles for Budget Over-limit State */
+        /* High-speed UI states */
         .budget-over { background: #fee2e2 !important; border: 2px solid #ef4444 !important; }
-        
         .text-danger { color: #ef4444 !important; }
         
         .scroll-area::-webkit-scrollbar { width: 5px; }
@@ -30,7 +29,7 @@
     <div class="app-container">
         <header>
             <div class="user-info" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                <span id="user-display-name" style="font-weight: 600; font-size: 14px; opacity: 0.9;">Welcome!</span>
+                <span id="user-display-name" style="font-weight: 600; font-size: 14px; opacity: 0.9;">Hi! Welcome back</span>
                 <button id="logout-btn" style="background: rgba(255,255,255,0.2); color: white; border: none; padding: 6px 12px; border-radius: 20px; cursor: pointer; font-size: 11px;">
                     Logout <i class="fas fa-right-from-bracket" style="font-size:14px; opacity:0.8;"></i>
                 </button> 
@@ -56,7 +55,7 @@
                     <input type="number" id="monthly-budget" placeholder="Enter Limit" style="flex: 1; padding: 8px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 12px;">
                     <button id="save-budget-btn" style="background: #1e293b; color: white; border: none; padding: 8px 12px; border-radius: 10px; font-size: 11px; cursor: pointer;">Save</button>
                 </div>
-                <p id="budget-status" style="font-size: 11px; margin-top: 8px; font-weight: 700;"></p>
+                <div id="budget-status" style="font-size: 11px; margin-top: 8px; font-weight: 700; min-height: 15px;"></div>
             </div>
         </div>
 
@@ -70,7 +69,9 @@
 
         <div class="scroll-area">
             <h3 style="margin: 15px 0 10px 0; font-size: 17px; color: #010a1d;">Recent Transactions</h3>
-            <ul id="list"></ul>
+            <ul id="list">
+                <p style='text-align:center; color:#94a3b8; font-size:13px; margin-top: 20px;'>Loading transactions...</p>
+            </ul>
         </div>
 
         <nav class="bottom-nav">
