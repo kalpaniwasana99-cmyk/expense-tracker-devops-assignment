@@ -13,13 +13,13 @@ const budgetStatus = document.getElementById('budget-status');
 
 let currentBudget = 0;
 
-// Check user authentication status
+// Listen for authentication state changes
 onAuthStateChanged(auth, (user) => {
     if (user) {
         const userName = user.displayName || user.email.split('@')[0];
         document.getElementById('user-display-name').innerText = `Hi, ${userName}!`;
         
-        // Load the saved budget and then start listening to expenses
+        // Initial setup: Load budget settings and start listening to expense data
         loadBudget(user.uid);
         listenToExpenses(user.uid);
     } else {
@@ -27,16 +27,20 @@ onAuthStateChanged(auth, (user) => {
     }
 });
 
-// Load the monthly budget limit from Firestore
+// Retrieve the saved monthly budget from Firestore
 async function loadBudget(uid) {
-    const budgetDoc = await getDoc(doc(db, "budgets", uid));
-    if (budgetDoc.exists()) {
-        currentBudget = budgetDoc.data().limit;
-        budgetInput.value = currentBudget;
+    try {
+        const budgetDoc = await getDoc(doc(db, "budgets", uid));
+        if (budgetDoc.exists()) {
+            currentBudget = budgetDoc.data().limit;
+            budgetInput.value = currentBudget;
+        }
+    } catch (error) {
+        console.error("Error loading budget:", error);
     }
 }
 
-// Save the monthly budget limit to Firestore
+// Save or update the monthly budget limit
 if (saveBudgetBtn) {
     saveBudgetBtn.onclick = async () => {
         const user = auth.currentUser;
@@ -45,17 +49,19 @@ if (saveBudgetBtn) {
             try {
                 await setDoc(doc(db, "budgets", user.uid), { limit: limit });
                 currentBudget = limit;
-                alert("Budget limit saved successfully!");
-                // Re-trigger UI update if listener is active
+                alert("Monthly budget limit saved!");
+                // Refresh data to apply changes immediately
                 location.reload(); 
             } catch (error) {
                 console.error("Budget Save Error:", error);
             }
+        } else {
+            alert("Please enter a valid numeric limit.");
         }
     };
 }
 
-// Listen for real-time updates of expenses
+// Set up real-time listener for expense records
 function listenToExpenses(uid) {
     const q = query(
         collection(db, "expenses"), 
@@ -77,7 +83,7 @@ function listenToExpenses(uid) {
                 total += parseFloat(item.price || 0);
                 
                 const li = document.createElement('li');
-                li.setAttribute('style', 'display: flex !important; justify-content: space-between !important; align-items: center !important; background: transparent !important; padding: 12px 0 !important; border-bottom: 1px solid rgba(0,0,0,0.05) !important; margin-bottom: 0 !important; box-shadow: none !important;');
+                li.setAttribute('style', 'display: flex !important; justify-content: space-between !important; align-items: center !important; background: transparent !important; padding: 12px 0 !important; border-bottom: 1px solid rgba(0,0,0,0.05) !important;');
                 
                 li.innerHTML = `
                     <div style="flex: 1;">
@@ -92,37 +98,39 @@ function listenToExpenses(uid) {
             });
         }
 
-        // Update Total Amount UI
+        // Update the total spending display
         if (totalAmountDisplay) {
             totalAmountDisplay.innerText = `Rs. ${total.toLocaleString()}`;
         }
 
-        // Check against the monthly budget limit
+        // Evaluate spending against the budget
         checkBudgetLimit(total);
 
     }, (error) => {
-        console.error("Firestore Listen Error:", error);
+        console.error("Firestore Listener Error:", error);
     });
 }
 
-// Monitor spending against the budget and update UI colors
+// Function to handle UI updates when budget is exceeded
 function checkBudgetLimit(total) {
+    if (!budgetCard || !budgetStatus) return;
+
     if (currentBudget > 0 && total > currentBudget) {
-        // Warning: Budget Exceeded
+        // Apply warning styles if budget is exceeded
         budgetCard.classList.add('budget-over');
         totalAmountDisplay.classList.add('text-danger');
-        budgetStatus.innerText = "⚠️ Budget Exceeded!";
+        budgetStatus.innerText = "⚠️ Alert: Monthly Budget Exceeded!";
         budgetStatus.style.color = "#ef4444";
     } else {
-        // Budget OK
+        // Reset to normal styles
         budgetCard.classList.remove('budget-over');
         totalAmountDisplay.classList.remove('text-danger');
-        budgetStatus.innerText = currentBudget > 0 ? "Budget is within safe limits." : "";
+        budgetStatus.innerText = currentBudget > 0 ? "Spending is within your limit." : "";
         budgetStatus.style.color = "#10b981";
     }
 }
 
-// Add a new expense record to Firestore
+// Handle new transaction form submission
 if (transactionForm) {
     transactionForm.onsubmit = async (e) => {
         e.preventDefault();
@@ -141,16 +149,15 @@ if (transactionForm) {
                 textInput.value = '';
                 amountInput.value = '';
             } catch (error) {
-                console.error("Add Error:", error);
-                alert("Error adding transaction.");
+                console.error("Error adding transaction:", error);
             }
         }
     };
 }
 
-// Delete an expense record
+// Global function to delete transactions
 window.deleteExpense = async function(id) {
-    if (!confirm("Delete this transaction?")) return;
+    if (!confirm("Are you sure you want to delete this?")) return;
     try {
         await deleteDoc(doc(db, "expenses", id));
     } catch (error) {
@@ -158,10 +165,10 @@ window.deleteExpense = async function(id) {
     }
 }
 
-// Logout functionality
+// User logout functionality
 if (logoutBtn) {
     logoutBtn.onclick = () => {
-        if (confirm("Are you sure you want to logout?")) {
+        if (confirm("Logout from Expense Tracker?")) {
             signOut(auth).then(() => { 
                 window.location.href = "login.html"; 
             }).catch((error) => console.error("Logout Error:", error));
