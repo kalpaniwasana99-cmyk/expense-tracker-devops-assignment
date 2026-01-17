@@ -8,12 +8,15 @@ const budgetInput = document.getElementById('monthly-budget');
 const saveBudgetBtn = document.getElementById('save-budget-btn');
 const budgetCard = document.getElementById('budget-card');
 const budgetStatus = document.getElementById('budget-status');
+const transactionForm = document.getElementById('transaction-form');
+const logoutBtn = document.getElementById('logout-btn');
 
 let currentBudget = 0;
 
+// Listen for Auth State
 onAuthStateChanged(auth, (user) => {
     if (user) {
-        document.getElementById('user-display-name').innerText = `Hi, ${user.displayName || 'User'}!`;
+        document.getElementById('user-display-name').innerText = `Hi, ${user.displayName || user.email.split('@')[0]}!`;
         loadBudget(user.uid);
         listenToExpenses(user.uid);
     } else {
@@ -21,6 +24,7 @@ onAuthStateChanged(auth, (user) => {
     }
 });
 
+// Load saved budget limit
 async function loadBudget(uid) {
     const budgetDoc = await getDoc(doc(db, "budgets", uid));
     if (budgetDoc.exists()) {
@@ -29,6 +33,7 @@ async function loadBudget(uid) {
     }
 }
 
+// Save budget limit
 if (saveBudgetBtn) {
     saveBudgetBtn.onclick = async () => {
         const user = auth.currentUser;
@@ -36,21 +41,26 @@ if (saveBudgetBtn) {
         if (user && !isNaN(limit)) {
             await setDoc(doc(db, "budgets", user.uid), { limit: limit });
             currentBudget = limit;
-            alert("Budget saved!");
+            alert("Monthly budget limit saved!");
             location.reload(); 
         }
     };
 }
 
+// Listen to expenses and update UI
 function listenToExpenses(uid) {
+    // Corrected Query: Fetching and ordering by timestamp
     const q = query(collection(db, "expenses"), where("uid", "==", uid), orderBy("timestamp", "desc"));
+    
     onSnapshot(q, (snapshot) => {
+        if (!list) return;
         list.innerHTML = snapshot.empty ? "<p style='text-align:center; color:#94a3b8; font-size:13px;'>No transactions yet.</p>" : "";
         let total = 0;
 
         snapshot.forEach((docSnap) => {
             const item = docSnap.data();
             total += parseFloat(item.price || 0);
+            
             const li = document.createElement('li');
             li.setAttribute('style', 'display: flex; justify-content: space-between; align-items: center; padding: 12px 10px; border-bottom: 1px solid rgba(0,0,0,0.05);');
             li.innerHTML = `
@@ -62,11 +72,41 @@ function listenToExpenses(uid) {
             list.appendChild(li);
         });
 
-        totalAmountDisplay.innerText = `Rs. ${total.toLocaleString()}`;
+        // Update Total Display
+        if (totalAmountDisplay) {
+            totalAmountDisplay.innerText = `Rs. ${total.toLocaleString()}`;
+        }
         checkBudgetLimit(total);
     });
 }
 
+// ADD TRANSACTION LOGIC (This was missing)
+if (transactionForm) {
+    transactionForm.onsubmit = async (e) => {
+        e.preventDefault();
+        const textInput = document.getElementById('text');
+        const amountInput = document.getElementById('amount');
+        const user = auth.currentUser;
+
+        if (textInput.value && amountInput.value && user) {
+            try {
+                await addDoc(collection(db, "expenses"), {
+                    itemName: textInput.value,
+                    price: parseFloat(amountInput.value),
+                    uid: user.uid,
+                    timestamp: new Date() // Firestore timestamp
+                });
+                textInput.value = '';
+                amountInput.value = '';
+            } catch (error) {
+                console.error("Error adding expense:", error);
+                alert("Failed to add transaction.");
+            }
+        }
+    };
+}
+
+// Budget check logic
 function checkBudgetLimit(total) {
     if (currentBudget > 0 && total > currentBudget) {
         budgetCard.classList.add('budget-over');
@@ -81,7 +121,19 @@ function checkBudgetLimit(total) {
     }
 }
 
+// Logout logic
+if (logoutBtn) {
+    logoutBtn.onclick = async () => {
+        if (confirm("Logout?")) {
+            await signOut(auth);
+            window.location.href = "login.html";
+        }
+    };
+}
+
 // Global delete function
 window.deleteExpense = async (id) => {
-    if (confirm("Delete this?")) await deleteDoc(doc(db, "expenses", id));
+    if (confirm("Delete this record permanently?")) {
+        await deleteDoc(doc(db, "expenses", id));
+    }
 };
