@@ -10,11 +10,11 @@
     <style>
         .app-container {
             min-height: 750px; 
-<<<<<<< HEAD
+
             max-height: 750px; 
-=======
+
             max-height: 90vh; /* උස ස්ථාවර කර ස්ක්‍රෝල් වීමට ඉඩ තැබුවා */
->>>>>>> 8f7e78f16771f4e27fd6775ad2f490bddd2ce5ce
+
             display: flex;
             flex-direction: column;
             overflow: hidden;
@@ -26,13 +26,13 @@
             flex: 1;
             padding: 0 25px;
             margin-top: 20px;
-<<<<<<< HEAD
+
             overflow-y: auto; /* Scrollbar*/
             margin-bottom: 90px;
-=======
+
             overflow-y: auto;
             margin-bottom: 80px;
->>>>>>> 8f7e78f16771f4e27fd6775ad2f490bddd2ce5ce
+
         }
 
         /* Scrollbar modification */
@@ -150,7 +150,7 @@
             });
         }
 
-<<<<<<< HEAD
+
         // delete Function
         window.deleteRecord = async function(id) {
             if (!confirm("Are you sure you want to delete this record?")) return;
@@ -164,7 +164,7 @@
                 if (response.ok) {
                     loadFullHistory(); // again reload 
                 } else {
-=======
+
         // Firebase හරහා මකා දැමීමේ Function එක
         window.deleteHistoryItem = async function(id) {
             if (confirm("Delete this record permanently?")) {
@@ -172,7 +172,7 @@
                     await deleteDoc(doc(db, "expenses", id));
                 } catch (error) {
                     console.error("Error deleting:", error);
->>>>>>> 8f7e78f16771f4e27fd6775ad2f490bddd2ce5ce
+
                     alert("Failed to delete record.");
                 }
             }
