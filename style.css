@@ -116,7 +116,7 @@ input::placeholder {
 }
 
 #list li, .history-list div, .goals-scroll-area div {
-    color: #180303 !important;
+    color: #d1c0c0 !important;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
 }
 
