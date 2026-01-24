@@ -31,7 +31,6 @@
             border-radius: 20px;
         }
 
-        /* Input fields with white text color as requested */
         input[type="text"], input[type="number"] {
             width: 100%; 
             padding: 12px; 
@@ -39,7 +38,7 @@
             border-radius: 10px; 
             border: 1px solid #475569; 
             background: #0f172a; 
-            color: white !important; /* Forces text color to white */
+            color: white !important; 
             font-size: 14px;
         }
 
@@ -51,58 +50,76 @@
         }
 
         .goal-item-card {
-            background: #1e293b; /* Changed back to dark to match the theme */
-            padding: 15px; 
+            background: #1e293b; 
+            padding: 20px; 
             border-radius: 15px; 
-            margin-bottom: 15px; 
+            margin-bottom: 20px; 
             border: 1px solid rgba(255,255,255,0.05);
-            box-shadow: 0 4px 6px rgba(111, 97, 97, 0.2);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
         }
 
-        .add-savings-box {
-            display: flex;
-            gap: 8px;
-            margin-top: 12px;
-            padding-top: 12px;
-            border-top: 1px dashed rgba(255,255,255,0.1);
-        }
-
-        .small-input {
-            flex: 1;
-            padding: 8px 12px;
-            border-radius: 8px;
-            border: 1px solid #475569;
+        /* Progress Bar Styles */
+        .progress-container {
             background: #0f172a;
-            color: white !important; /* White text for small inputs too */
-            font-size: 12px;
+            height: 12px;
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 10px;
+            border: 1px solid rgba(255,255,255,0.1);
         }
 
-        .btn-save-small {
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #6366f1, #a855f7);
+            border-radius: 10px;
+            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .savings-input-group {
+            display: flex;
+            gap: 10px;
+            background: rgba(15, 23, 42, 0.5);
+            padding: 10px;
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+
+        .savings-input-group input {
+            flex: 1;
+            background: transparent;
+            border: 1px solid #334155;
+            color: white;
+            padding: 8px;
+            border-radius: 6px;
+            margin-bottom: 0;
+            font-size: 13px;
+        }
+
+        .btn-add-money {
             background: #6366f1;
             color: white;
             border: none;
             padding: 8px 15px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 12px;
+            border-radius: 6px;
             font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            font-size: 12px;
         }
 
         .btn-delete {
-            background: none;
+            background: rgba(239, 68, 68, 0.1);
             border: none;
             color: #ef4444;
             cursor: pointer;
-            font-size: 14px;
-            padding: 5px;
-            opacity: 0.7;
+            padding: 8px;
+            border-radius: 8px;
             transition: 0.2s;
         }
-        .btn-delete:hover { opacity: 1; }
+        .btn-delete:hover { background: rgba(239, 68, 68, 0.2); }
 
-        /* Custom Scrollbar */
         .goals-scroll-area::-webkit-scrollbar { width: 5px; }
-        .goals-scroll-area::-webkit-scrollbar-track { background: transparent; }
         .goals-scroll-area::-webkit-scrollbar-thumb { background: #475569; border-radius: 10px; }
     </style>
 </head>
@@ -127,7 +144,7 @@
         </div>
 
         <div class="goals-scroll-area">
-            <h3 style="margin: 20px 0 15px 0; font-size: 18px; color: #937575;">Goal Progress</h3>
+            <h3 style="margin: 20px 0 15px 0; font-size: 18px; color: #94a3b8;">Goal Progress</h3>
             <div id="goals-list-container">
                 <p style="text-align:center; color:#94a3b8; margin-top:30px; font-size: 13px;">Loading your goals...</p>
             </div>
@@ -153,7 +170,7 @@
         </nav>
     </div>
 
-    <script type="module" src="goals.js">
+    <script type="module">
         import { auth, db } from "./firebase-config.js";
         import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { collection, addDoc, query, where, onSnapshot, deleteDoc, doc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
@@ -173,7 +190,10 @@
             const q = query(collection(db, "goals"), where("uid", "==", uid));
             onSnapshot(q, (snapshot) => {
                 container.innerHTML = snapshot.empty ? 
-                    "<p style='text-align:center; color:#94a3b8; margin-top:30px; font-size: 13px;'>No goals set yet. Start saving!</p>" : "";
+                    `<div style="text-align:center; padding:40px; color:#64748b;">
+                        <i class="fas fa-bullseye" style="font-size:40px; margin-bottom:10px;"></i>
+                        <p>No goals yet. Start saving today!</p>
+                    </div>` : "";
 
                 snapshot.forEach((docSnap) => {
                     const goalId = docSnap.id;
@@ -181,34 +201,38 @@
 
                     const current = parseFloat(goalData.currentSaved || 0);
                     const target = parseFloat(goalData.targetAmount || 1);
-                    const progress = (current / target) * 100;
+                    let progress = (current / target) * 100;
+                    if (progress > 100) progress = 100;
 
                     const card = document.createElement('div');
                     card.className = "goal-item-card";
                     card.innerHTML = `
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px; align-items: center;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
                             <div>
-                                <strong style="font-size: 15px; color: #ffffff;">${goalData.goalName}</strong>
-                                <div style="font-size: 11px; color: #94a3b8; margin-top: 2px;">
-                                    Saved: LKR ${current.toLocaleString()} / ${target.toLocaleString()}
-                                </div>
+                                <h3 style="margin:0; color:#f8fafc; font-size:17px;">${goalData.goalName}</h3>
+                                <p style="margin:5px 0 0; color:#94a3b8; font-size:12px;">
+                                    Target: <span style="color:#818cf8; font-weight:bold;">LKR ${target.toLocaleString()}</span>
+                                </p>
                             </div>
-                            <div style="display: flex; align-items: center; gap: 12px;">
-                                <span style="font-size: 13px; color: #818cf8; font-weight: 800;">${progress.toFixed(0)}%</span>
-                                <button class="btn-delete" onclick="deleteGoal('${goalId}')">
-                                    <i class="fas fa-trash-alt"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div style="width: 100%; height: 8px; background: #0f172a; border-radius: 10px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05);">
-                            <div style="width: ${progress > 100 ? 100 : progress}%; height: 100%; background: linear-gradient(to right, #6366f1, #a855f7); transition: width 0.5s ease;"></div>
-                        </div>
-                        <div class="add-savings-box">
-                            <input type="number" id="save-amount-${goalId}" class="small-input" placeholder="Add Amount (LKR)">
-                            <button class="btn-save-small" onclick="addSavings('${goalId}')">
-                                <i class="fas fa-plus"></i> Add
+                            <button class="btn-delete" onclick="deleteGoal('${goalId}')">
+                                <i class="fas fa-trash"></i>
                             </button>
-                        </div>`;
+                        </div>
+                        
+                        <div class="progress-container">
+                            <div class="progress-fill" style="width: ${progress}%"></div>
+                        </div>
+                        
+                        <div style="display: flex; justify-content: space-between; font-size: 11px; color: #cbd5e1;">
+                            <span>Saved: LKR ${current.toLocaleString()}</span>
+                            <span style="font-weight:bold; color:#818cf8;">${progress.toFixed(1)}%</span>
+                        </div>
+
+                        <div class="savings-input-group">
+                            <input type="number" id="input-${goalId}" placeholder="Amount to save">
+                            <button class="btn-add-money" onclick="addMoney('${goalId}')">Add Money</button>
+                        </div>
+                    `;
                     container.appendChild(card);
                 });
             });
@@ -232,15 +256,14 @@
                     targetInput.value = '';
                 } catch (error) {
                     console.error("Error adding goal:", error);
-                    alert("Error adding goal.");
                 }
             } else {
                 alert("Please fill in all fields.");
             }
         };
 
-        window.addSavings = async (id) => {
-            const input = document.getElementById(`save-amount-${id}`);
+        window.addMoney = async (id) => {
+            const input = document.getElementById(`input-${id}`);
             const amount = parseFloat(input.value);
             if (amount > 0) {
                 try {
@@ -250,7 +273,6 @@
                     input.value = '';
                 } catch (error) {
                     console.error("Error updating savings:", error);
-                    alert("Error updating savings.");
                 }
             } else {
                 alert("Enter a valid amount.");
@@ -263,7 +285,6 @@
                     await deleteDoc(doc(db, "goals", id));
                 } catch (error) {
                     console.error("Error deleting goal:", error);
-                    alert("Error deleting goal.");
                 }
             }
         };
