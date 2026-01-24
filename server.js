@@ -1,4 +1,4 @@
-import { auth, db } from "../firebase-config.js";
+import { auth, db } from "./firebase-config.js";
 const express = require('express');
 const admin = require('firebase-admin');
 const cors = require('cors');
