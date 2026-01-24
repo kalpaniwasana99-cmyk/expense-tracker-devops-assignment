@@ -1,67 +1,98 @@
 import { auth, db } from "./firebase-config.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { collection, addDoc, query, where, onSnapshot, deleteDoc, doc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { collection, query, where, onSnapshot, deleteDoc, doc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const container = document.getElementById('goals-list-container');
-const addGoalBtn = document.getElementById('add-goal-btn');
 
 onAuthStateChanged(auth, (user) => {
-    if (user) { listenToGoals(user.uid); } 
-    else { window.location.href = "login.html"; }
+    if (user) { 
+        listenToGoals(user.uid); 
+    } else { 
+        window.location.href = "login.html"; 
+    }
 });
 
 function listenToGoals(uid) {
     const q = query(collection(db, "goals"), where("uid", "==", uid));
     onSnapshot(q, (snapshot) => {
         container.innerHTML = snapshot.empty ? 
-            "<p style='text-align:center; color:#94a3b8; margin-top:30px;'>No goals set yet.</p>" : "";
+            `<div style="text-align:center; padding:40px; color:#64748b;">
+                <i class="fas fa-bullseye" style="font-size:40px; margin-bottom:10px;"></i>
+                <p>No goals yet. Start saving today!</p>
+            </div>` : "";
 
         snapshot.forEach((docSnap) => {
             const goalId = docSnap.id;
-            const goalData = docSnap.data();
-            const current = parseFloat(goalData.currentSaved || 0);
-            const target = parseFloat(goalData.targetAmount || 1);
-            const progress = (current / target) * 100;
+            const goal = docSnap.data();
+            const current = parseFloat(goal.currentSaved || 0);
+            const target = parseFloat(goal.targetAmount || 1);
+            let progress = (current / target) * 100;
+            if (progress > 100) progress = 100; 
 
             const card = document.createElement('div');
-            card.className = "goal-item-card"; 
+            card.className = "goal-item-card";
+            
+            card.style = "background:#1e293b; border-radius:15px; padding:20px; margin-bottom:20px; border:1px solid rgba(255,255,255,0.05); box-shadow: 0 4px 15px rgba(0,0,0,0.2);";
+
             card.innerHTML = `
-                <div style="display: flex; justify-content: space-between; margin-bottom: 8px; align-items: center;">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:15px;">
                     <div>
-                        <strong style="font-size: 15px; color: #ffffff;">${goalData.goalName}</strong>
-                        <div style="font-size: 11px; color: #94a3b8; margin-top: 2px;">
-                            LKR ${current.toLocaleString()} / ${target.toLocaleString()}
-                        </div>
+                        <h3 style="margin:0; color:#f8fafc; font-size:18px;">${goal.goalName}</h3>
+                        <p style="margin:5px 0 0; color:#94a3b8; font-size:13px;">
+                            Target: <span style="color:#818cf8; font-weight:bold;">LKR ${target.toLocaleString()}</span>
+                        </p>
                     </div>
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                        <span style="font-size: 13px; color: #818cf8; font-weight: 800;">${progress.toFixed(0)}%</span>
-                        <button class="delete-btn" onclick="deleteGoal('${goalId}')">
-                            <i class="fas fa-trash-alt"></i>
-                        </button>
-                    </div>
+                    <button class="delete-btn" onclick="deleteGoal('${goalId}')" style="background:rgba(239,68,68,0.1); color:#ef4444; border:none; padding:8px; border-radius:8px; cursor:pointer;">
+                        <i class="fas fa-trash"></i>
+                    </button>
                 </div>
-                <div style="width: 100%; height: 8px; background: #0f172a; border-radius: 10px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05);">
-                    <div style="width: ${progress > 100 ? 100 : progress}%; height: 100%; background: linear-gradient(to right, #6366f1, #a855f7); transition: width 0.5s ease;"></div>
+
+                <div style="background:#0f172a; height:12px; border-radius:10px; position:relative; overflow:hidden; margin-bottom:10px; border:1px solid rgba(255,255,255,0.1);">
+                    <div style="width:${progress}%; height:100%; background:linear-gradient(90deg, #6366f1, #a855f7); border-radius:10px; transition:width 0.8s cubic-bezier(0.4, 0, 0.2, 1);"></div>
                 </div>
-                <div class="add-savings-box" style="display: flex; gap: 8px; margin-top: 12px;">
-                    <input type="number" id="save-amount-${goalId}" class="small-input" placeholder="LKR" style="flex:1; padding:5px; border-radius:5px; border:1px solid #475569; background:#0f172a; color:white;">
-                    <button class="btn-save-small" onclick="addSavings('${goalId}')" style="background:#6366f1; border:none; color:white; border-radius:5px; padding:5px 10px; cursor:pointer;">Add</button>
-                </div>`;
+                
+                <div style="display:flex; justify-content:space-between; font-size:12px; color:#cbd5e1; margin-bottom:20px;">
+                    <span>Saved: LKR ${current.toLocaleString()}</span>
+                    <span style="font-weight:bold; color:#818cf8;">${progress.toFixed(1)}%</span>
+                </div>
+
+                <div style="display:flex; gap:10px; background:rgba(15,23,42,0.5); padding:10px; border-radius:10px;">
+                    <input type="number" id="input-${goalId}" placeholder="Enter amount to save" 
+                        style="flex:1; background:transparent; border:1px solid #334155; color:white; padding:8px; border-radius:6px; outline:none; font-size:14px;">
+                    <button onclick="addMoney('${goalId}')" 
+                        style="background:#6366f1; color:white; border:none; padding:8px 15px; border-radius:6px; font-weight:600; cursor:pointer; transition:0.3s;">
+                        Add Money
+                    </button>
+                </div>
+            `;
             container.appendChild(card);
         });
     });
 }
 
-// function of the update data 
-window.addSavings = async (id) => {
-    const input = document.getElementById(`save-amount-${id}`);
+// Add Money Function
+window.addMoney = async (id) => {
+    const input = document.getElementById(`input-${id}`);
     const amount = parseFloat(input.value);
-    if (amount > 0) {
-        await updateDoc(doc(db, "goals", id), { currentSaved: increment(amount) });
-        input.value = '';
+    
+    if (isNaN(amount) || amount <= 0) {
+        alert("Please enter a valid amount!");
+        return;
+    }
+
+    try {
+        const goalRef = doc(db, "goals", id);
+        await updateDoc(goalRef, {
+            currentSaved: increment(amount)
+        });
+        input.value = ""; 
+    } catch (error) {
+        console.error("Error adding money:", error);
     }
 };
 
-window.deleteGoal = async (id) => { 
-    if (confirm("Delete this goal?")) await deleteDoc(doc(db, "goals", id)); 
+window.deleteGoal = async (id) => {
+    if (confirm("Are you sure you want to delete this goal?")) {
+        await deleteDoc(doc(db, "goals", id));
+    }
 };
