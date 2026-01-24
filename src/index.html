@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Expense Tracker - Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="styles/style.css">
+    <style>
+        body { display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; margin: 0; padding: 20px; }
+        .app-container { min-height: 750px; max-height: 750px; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+        header { padding-bottom: 20px; flex-shrink: 0; }
+        .summary-card { margin-top: 0px; padding: 20px; border-radius: 20px; flex-shrink: 0; transition: all 0.3s ease; }
+        .input-group { padding: 15px 25px; flex-shrink: 0; }
+        .scroll-area { flex: 1; padding: 0 25px; margin-bottom: 90px; overflow-y: auto; }
+        #list { list-style: none; padding: 0; margin: 0; }
+        
+        /* High-speed UI states */
+        .budget-over { background: #fee2e2 !important; border: 2px solid #ef4444 !important; }
+        .text-danger { color: #ef4444 !important; }
+        
+        .scroll-area::-webkit-scrollbar { width: 5px; }
+        .scroll-area::-webkit-scrollbar-track { background: transparent; }
+        .scroll-area::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <header>
+            <div class="user-info" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <span id="user-display-name" style="font-weight: 600; font-size: 14px; opacity: 0.9;">Hi! Welcome back</span>
+                <button id="logout-btn" style="background: rgba(255,255,255,0.2); color: white; border: none; padding: 6px 12px; border-radius: 20px; cursor: pointer; font-size: 11px;">
+                    Logout <i class="fas fa-right-from-bracket" style="font-size:14px; opacity:0.8;"></i>
+                </button> 
+            </div>
+            <h1 style="margin: 0; font-size: 24px; font-weight: 800;">Expense Tracker</h1>
+            <p style="opacity: 0.8; font-size: 13px;">Manage your daily spending</p>
+        </header>
+
+        <div class="summary-card" id="budget-card">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div>
+                    <span style="font-size: 12px; color: #090c0f; font-weight: 600; text-transform: uppercase; display: block; margin-bottom: 5px;">Total Monthly Expense</span>
+                    <div class="total-amount" id="total-amount" style="font-size: 32px; font-weight: 800; color: #0f0f13;">Rs. 0.00</div>
+                </div>
+                <button id="view-history-btn" onclick="window.location.href='history.html'" style="background: #1e293b; color: white; border: none; padding: 8px 12px; border-radius: 20px; cursor: pointer; font-size: 11px; font-weight: 600;">
+                    <i class="fas fa-history"></i> History
+                </button>
+            </div>
+            
+            <div style="margin-top: 15px; border-top: 1px dashed rgba(0,0,0,0.1); padding-top: 10px;">
+                <label style="font-size: 11px; font-weight: 800; color: #475569;">SET BUDGET (LKR)</label>
+                <div style="display: flex; gap: 8px; margin-top: 5px;">
+                    <input type="number" id="monthly-budget" placeholder="Enter Limit" style="flex: 1; padding: 8px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 12px;">
+                    <button id="save-budget-btn" style="background: #4d6da1; color: white; border: none; padding: 8px 10px; border-radius: 10px; font-size: 11px; cursor: pointer;">Save</button>
+                </div>
+                <div id="budget-status" style="font-size: 11px; margin-top: 8px; font-weight: 700; min-height: 15px;"></div>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <form id="transaction-form">
+                <input type="text" id="text" placeholder="Item Name" required style="width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #e2e8f0; margin-bottom: 10px;">
+                <input type="number" id="amount" placeholder="Amount (LKR)" required style="width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #e2e8f0; margin-bottom: 10px;">
+                <button type="submit" class="btn-add" style="width: 100%;"><i class="fas fa-plus-circle"></i> Add Transaction</button>
+            </form>
+        </div>
+
+        <div class="scroll-area">
+            <h3 style="margin: 15px 0 10px 0; font-size: 17px; color: #010a1d;">Recent Transactions</h3>
+            <ul id="list">
+                <p style='text-align:center; color:#94a3b8; font-size:13px; margin-top: 20px;'>Loading transactions...</p>
+            </ul>
+        </div>
+
+        <nav class="bottom-nav">
+            <a href="index.html" class="nav-item active"><i class="fas fa-home"></i> <span>Home</span></a>
+            <a href="summary.html" class="nav-item"><i class="fas fa-chart-pie"></i> <span>Stats</span></a>
+            <a href="goals.html" class="nav-item"><i class="fas fa-bullseye"></i> <span>Goals</span></a>
+            <a href="profile.html" class="nav-item"><i class="fas fa-user-circle"></i> <span>Profile</span></a>
+        </nav>
+    </div>
+    <script type="module" src="scripts/script.js"></script>
+</body>
+</html>

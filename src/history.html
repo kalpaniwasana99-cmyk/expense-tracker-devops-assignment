@@ -6,19 +6,15 @@
     <title>Expense History - Expense Tracker</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="styles/style.css">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
     <style>
         .app-container {
             min-height: 750px; 
-<<<<<<< HEAD
-
-            max-height: 750px; 
-
-            max-height: 90vh; /* උස ස්ථාවර කර ස්ක්‍රෝල් වීමට ඉඩ තැබුවා */
-
-=======
             max-height: 90vh; /* Fixed height with scroll support */
->>>>>>> a1949f83faf112fc435a34d0bfdd1f8b48c58464
             display: flex;
             flex-direction: column;
             overflow: hidden;
@@ -30,18 +26,8 @@
             flex: 1;
             padding: 0 25px;
             margin-top: 20px;
-<<<<<<< HEAD
-
-            overflow-y: auto; /* Scrollbar*/
-            margin-bottom: 90px;
-
-            overflow-y: auto;
-            margin-bottom: 80px;
-
-=======
             overflow-y: auto; /* Enable vertical scrolling */
             margin-bottom: 80px;
->>>>>>> a1949f83faf112fc435a34d0bfdd1f8b48c58464
         }
 
         /* Custom Scrollbar Styles */
@@ -68,6 +54,26 @@
             opacity: 0.6;
         }
         .delete-btn:hover { opacity: 1; transform: scale(1.1); }
+
+        /* Styles for the Download Button */
+        .btn-download-pdf {
+            width: 100%;
+            padding: 12px;
+            margin-top: 15px;
+            background: #10b981;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: 0.3s;
+        }
+        .btn-download-pdf:hover { background: #059669; }
     </style>
 </head>
 <body>
@@ -81,11 +87,15 @@
             </div>
             <h1 style="margin: 0; font-size: 28px; font-weight: 800;">Expense History</h1>
             <p style="opacity: 0.8; font-size: 14px;">Review all your past transactions</p>
+            
+            <button id="download-pdf" class="btn-download-pdf">
+                <i class="fas fa-file-pdf"></i> Download PDF Report
+            </button>
         </header>
 
         <div class="history-list">
             <div id="history-container">
-                <p style="text-align:center; color:#0e0f12; margin-top:50px;">Loading history...</p>
+                <p style="text-align:center; color:#94a3b8; margin-top:50px;">Loading history...</p>
             </div>
         </div>
 
@@ -109,7 +119,7 @@
         </nav>
     </div>
 
-    <script type="module">
+    <script type="module" src="scripts/script.js">
         import { auth, db } from "./firebase-config.js";
         import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { collection, query, where, orderBy, onSnapshot, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
@@ -129,7 +139,6 @@
         function listenToFullHistory(uid) {
             const q = query(collection(db, "expenses"), where("uid", "==", uid), orderBy("timestamp", "desc"));
 
-            // Firestore Real-time Listener
             onSnapshot(q, (snapshot) => {
                 container.innerHTML = snapshot.empty ? 
                     "<p style='text-align:center; color:#94a3b8; margin-top:50px;'>No history found.</p>" : 
@@ -139,7 +148,6 @@
                     const item = docSnap.data();
                     const card = document.createElement('div');
                     
-                    // Style matching the Black Theme
                     card.setAttribute('style', 'display: flex !important; justify-content: space-between !important; align-items: center !important; background: transparent !important; padding: 15px 0 !important; border-bottom: 1px solid rgba(255,255,255,0.1) !important;');
                     
                     card.innerHTML = `
@@ -161,37 +169,57 @@
             });
         }
 
-<<<<<<< HEAD
+        // --- PDF Generation Logic ---
+        document.getElementById('download-pdf').addEventListener('click', () => {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
 
-        // delete Function
-        window.deleteRecord = async function(id) {
-            if (!confirm("Are you sure you want to delete this record?")) return;
+            // PDF Title and Formatting
+            doc.setFontSize(20);
+            doc.setTextColor(30, 41, 59); // Dark blue color
+            doc.text("Expense Tracker Report", 14, 22);
+            
+            doc.setFontSize(10);
+            doc.setTextColor(100);
+            doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 30);
 
-            try {
-                const response = await fetch(`${API_URL}/delete-expense/${id}`, {
-                    method: 'DELETE',
-                    headers: { 'ngrok-skip-browser-warning': 'true' }
-                });
+            // Extract data from history container
+            const tableRows = [];
+            const historyItems = container.querySelectorAll('div[style*="display: flex"]');
 
-                if (response.ok) {
-                    loadFullHistory(); // again reload 
-                } else {
+            historyItems.forEach(item => {
+                const name = item.querySelector('span').innerText;
+                const date = item.querySelector('small').innerText.trim();
+                const price = item.querySelector('span[style*="color: #818cf8"]').innerText;
+                tableRows.push([date, name, price]);
+            });
 
-        // Firebase හරහා මකා දැමීමේ Function එක
-=======
-        // Function to delete record via Firebase
->>>>>>> a1949f83faf112fc435a34d0bfdd1f8b48c58464
+            if (tableRows.length === 0) {
+                alert("No expense records found to export.");
+                return;
+            }
+
+            // Generate Table
+            doc.autoTable({
+                head: [['Date', 'Description', 'Amount']],
+                body: tableRows,
+                startY: 40,
+                theme: 'grid',
+                headStyles: { fillColor: [99, 102, 241], textColor: [255, 255, 255] }, // Matches your primary blue
+                styles: { fontSize: 10, cellPadding: 5 }
+            });
+
+            // Save PDF
+            doc.save(`Expense_Report_${new Date().toISOString().slice(0,10)}.pdf`);
+        });
+
+        // Function to delete record permanently via Firebase
         window.deleteHistoryItem = async function(id) {
             if (confirm("Delete this record permanently?")) {
                 try {
                     await deleteDoc(doc(db, "expenses", id));
                 } catch (error) {
-<<<<<<< HEAD
-                    console.error("Error deleting:", error);
-
-=======
                     console.error("Error deleting document:", error);
->>>>>>> a1949f83faf112fc435a34d0bfdd1f8b48c58464
                     alert("Failed to delete record.");
                 }
             }
