@@ -143,3 +143,4 @@ Local Testing: We couldn't test Firebase features locally without a secure conne
 Firestore Indexing: Complex queries caused delays; we solved this by creating Composite Indexes in the Firestore console.
 
 Docker Port Conflicts: If http://localhost:8080 does not work, check if another service is using port 8080. You can change the port mapping in docker-compose.yml from "8080:80" to "8081:80".
+
