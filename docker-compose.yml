@@ -1,17 +1,61 @@
 version: '3.8'
 
 services:
+  # Main frontend application container
   expense-tracker-frontend:
-    build: 
+    build:
       context: .
       dockerfile: Dockerfile
     container_name: expense_tracker_app
+
+    # Map host port 8080 to container port 8080
     ports:
-      - "8080:80"
+      - "8080:8080"
     restart: unless-stopped
+
+    # Wait for ngrok to be fully healthy before starting 
+    depends_on:
+      ngrok:
+        condition: service_healthy
+
+    # Resource limits to prevent Out of Memory errors
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+
+    # Connect to the private network
     networks:
       - app-network
 
+    # Named volume for better I/O performance
+    volumes:
+      - app-data:/app/data
+
+  # Ngrok service for secure HTTPS tunneling 
+  ngrok:
+    image: wernight/ngrok
+    container_name: ngrok_service
+    ports:
+      - "4040:4040"
+    environment:
+      NGROK_PORT: expense-tracker-frontend:8080
+
+    # Health check to ensure ngrok is connected to the internet
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4040/api/tunnels"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - app-network
+
+# Private bridge network for security 
 networks:
   app-network:
     driver: bridge
+
+# Named volume declaration
+volumes:
+  app-data:
