@@ -159,6 +159,7 @@ Firestore Index:
 The following Composite Index is required in Firestore for the dashboard:
 
 Collection ID: expenses
+
 Fields Indexed: uid (Ascending) and timestamp (Descending).
 
 
